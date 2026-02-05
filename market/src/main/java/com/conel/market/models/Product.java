@@ -26,6 +26,8 @@ public class Product extends BaseEntity{
     private Double price;
     private Integer stockQuantity;
 
+    private String imageUrl;
+    @Column(nullable = false,columnDefinition = "boolean default false")
     private boolean deleted=false;
 
     @ManyToOne(fetch = FetchType.LAZY)

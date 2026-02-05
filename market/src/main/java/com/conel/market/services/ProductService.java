@@ -25,8 +25,9 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
 
     //SAVE
-    public ProductResponseDto saveProduct(ProductDto dto){
+    public ProductResponseDto saveProduct(ProductDto dto,String fileName){
         var product=productMapper.toProduct(dto);
+        product.setImageUrl(fileName);
 
         if (dto.categoryId()!=null){
             Category category=categoryRepository.findById(dto.categoryId())

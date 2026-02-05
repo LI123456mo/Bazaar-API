@@ -2,6 +2,7 @@ package com.conel.market.controllers;
 
 import com.conel.market.dto.ProductDto;
 import com.conel.market.dto.ProductResponseDto;
+import com.conel.market.file.FileStorageService;
 import com.conel.market.repositories.ProductRepository;
 import com.conel.market.services.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -10,8 +11,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -21,13 +24,16 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
     private final ProductRepository productRepository;
+    private final FileStorageService fileStorageService;
 
-    @PostMapping
-    public ResponseEntity<ProductResponseDto> create(@RequestBody ProductDto productDto){
-        ProductResponseDto savedProduct=productService.saveProduct(productDto);
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(savedProduct);
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<ProductResponseDto> createProduct(
+            @RequestPart("product") ProductDto requestDto,
+            @RequestPart("file")MultipartFile file
+            ){
+        String fileName=fileStorageService.saveFile(file);
+        ProductResponseDto response=productService.saveProduct(requestDto,fileName);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping
