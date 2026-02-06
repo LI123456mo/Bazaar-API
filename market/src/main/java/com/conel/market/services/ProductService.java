@@ -15,6 +15,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Service
@@ -40,15 +44,28 @@ public class ProductService {
         return productMapper.toProductResponseDto(saveProduct);
     }
 
-    public void updateProduct(Integer id,Product updateDetails){
+    public ProductResponseDto updateProduct(Integer id,ProductDto dto,String newFileName){
         Product existingProduct=getProductEntity(id);
 
-        //updates the details
-        existingProduct.setName(updateDetails.getName());
-        existingProduct.setPrice(updateDetails.getPrice());
-        existingProduct.setDescription(updateDetails.getDescription());
+        if (newFileName!=null){
+            String oldFileName=existingProduct.getImageUrl();
+            if (oldFileName!=null){
+                try {
+                    Path oldFilePath=Paths.get("uploads").resolve(oldFileName);
+                    Files.deleteIfExists(oldFilePath);
+                }catch (IOException e){
+                    System.out.println("Warning: Could not delete old file: " + e.getMessage());
+                }
+            }
+            existingProduct.setImageUrl(newFileName);
+        }
+        existingProduct.setName(dto.name());
+        existingProduct.setDescription(dto.description());
+        existingProduct.setPrice(dto.price());
+        existingProduct.setStockQuantity(dto.stockQuantity());
 
-        productRepository.save(existingProduct);
+        Product savedProduct=productRepository.save(existingProduct);
+        return productMapper.toProductResponseDto(savedProduct);
     }
     public ProductResponseDto findById(Integer id){
         return productRepository.findById(id)
@@ -100,5 +117,23 @@ public class ProductService {
                 .and(ProductSpecification.priceLessThan(maxPrice));
         return productRepository.findAll(spec,pageable)
                 .map(productMapper::toProductResponseDto);
+    }
+
+    public void deleteProduct(Integer id){
+        Product product=productRepository.findById(id)
+                .orElseThrow(()->new RuntimeException("Product not found"));
+
+        String fileName=product.getImageUrl();
+
+        if (fileName!=null){
+            try {
+
+                Path filePath= Paths.get("uploads").resolve(fileName);
+                Files.deleteIfExists(filePath);
+            }catch (IOException e){
+                System.out.println("Could not delete file: "+e.getMessage());
+            }
+        }
+        productRepository.delete(product);
     }
 }

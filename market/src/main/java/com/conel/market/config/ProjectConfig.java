@@ -23,9 +23,11 @@ public class ProjectConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.disable()) // Add this to disable Cross-Origin issues
+                .cors(cors -> cors.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll() // The "Nuclear" option: Open all doors for 5 minutes
+                        .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers("/api/v1/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.frameOptions(frame -> frame.disable())); // For H2 console if you use it
 

@@ -9,6 +9,7 @@ public record ProductResponseDto(
         Double price,
         Integer stockQuantity,
         String categoryName,
+        String imageUrl,
         LocalDateTime createdAt
 ) {
 }

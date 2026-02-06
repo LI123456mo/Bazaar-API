@@ -16,7 +16,7 @@ import java.util.List;
 @SuperBuilder
 @Entity
 @SQLDelete(sql="UPDATE product SET deleted = true where id=?")
-@SQLRestriction("deleted=false")//makes product disappear in website
+@SQLRestriction("deleted=false")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 
 public class Product extends BaseEntity{

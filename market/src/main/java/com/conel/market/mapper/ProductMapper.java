@@ -24,6 +24,7 @@ public class ProductMapper {
 
     //WHAT THE USER NEEDS TO SEE
     public ProductResponseDto toProductResponseDto(Product product){
+        String baseUrl="http://localhost:8080/uploads/";
         return new ProductResponseDto(
                 product.getId(),
                 product.getName(),
@@ -32,6 +33,7 @@ public class ProductMapper {
                 product.getStockQuantity(),
                 //If category exists ,get its name , else , null
                 product.getCategory()!=null?product.getCategory().getName():null,
+                product.getImageUrl()!=null?baseUrl+product.getImageUrl():null,
                 product.getCreatedAt()
         );
     }

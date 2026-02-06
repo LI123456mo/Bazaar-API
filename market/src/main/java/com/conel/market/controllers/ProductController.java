@@ -36,9 +36,9 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id){
-        productRepository.deleteById(id);
+        productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -63,9 +63,18 @@ public class ProductController {
         return ResponseEntity.ok(results);
     }
 
-    @PutMapping("/{productId}/increase")
-    public ProductResponseDto updateStock(@PathVariable Integer productId,@RequestParam Integer quantity){
-        return productService.increaseStock(productId,quantity);
+    @PutMapping(value = "/{id}",consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<ProductResponseDto> updateStock(
+            @PathVariable Integer productId,
+            @RequestPart("product") ProductDto dto,
+            @RequestPart(value = "file",required = false)MultipartFile file
+    ){
+        String fileName=null;
+        if (file!=null && !file.isEmpty()){
+            fileName=fileStorageService.saveFile(file);
+        }
+        ProductResponseDto response=productService.updateProduct(productId,dto,fileName);
+        return ResponseEntity.ok(response);
     }
 
     private  Sort parseSort(String sort){
