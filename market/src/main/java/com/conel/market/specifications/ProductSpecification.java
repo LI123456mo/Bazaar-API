@@ -32,7 +32,7 @@ public class ProductSpecification {
     public static Specification<Product> hasCategoryName(String categoryName){
         return (root, query, builder)->{
             if (categoryName==null || categoryName.isEmpty())return null;
-            return builder.equal(root.get("category").get("name"),categoryName);
+            return builder.equal(root.join("category").get("name"),categoryName);
         };
     }
 }

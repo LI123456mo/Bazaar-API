@@ -76,7 +76,7 @@ public class OrderService{
     public OrderResponseDto findById(Integer id){
         return orderRepository.findById(id)
                 .map(orderMapper::toOrderResponseDto)
-                .orElseThrow(()->new RuntimeException("Category not found with id:" + id));
+                .orElseThrow(()->new RuntimeException("Order not found with id:" + id));
     }
 
     public List<OrderResponseDto> findAll() {

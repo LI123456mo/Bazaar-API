@@ -28,7 +28,7 @@ public class Order extends BaseEntity{
     private User user;
 
     @Builder.Default
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order",cascade = CascadeType.ALL,orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     List<OrderItem> orderItems=new ArrayList<>();

@@ -65,7 +65,7 @@ public class ProductController {
 
     @PutMapping(value = "/{id}",consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ProductResponseDto> updateStock(
-            @PathVariable Integer productId,
+            @PathVariable Integer id,
             @RequestPart("product") ProductDto dto,
             @RequestPart(value = "file",required = false)MultipartFile file
     ){
@@ -73,7 +73,7 @@ public class ProductController {
         if (file!=null && !file.isEmpty()){
             fileName=fileStorageService.saveFile(file);
         }
-        ProductResponseDto response=productService.updateProduct(productId,dto,fileName);
+        ProductResponseDto response=productService.updateProduct(id,dto,fileName);
         return ResponseEntity.ok(response);
     }
 

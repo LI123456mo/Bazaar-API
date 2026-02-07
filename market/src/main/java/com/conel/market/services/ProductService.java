@@ -11,6 +11,7 @@ import com.conel.market.specifications.ProductSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.PredicateSpecification;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -111,10 +112,16 @@ public class ProductService {
     }
 
     public Page<ProductResponseDto> searchProducts(String name, Double maxPrice, String category, Pageable pageable){
-        Specification<Product> spec=Specification
-                .where(ProductSpecification.nameLike(name))
-                .and(ProductSpecification.hasCategoryName(category))
-                .and(ProductSpecification.priceLessThan(maxPrice));
+        Specification<Product> spec=Specification.where((Specification<Product>) null);
+        if (name!=null && !name.isEmpty()){
+            spec=spec.and(ProductSpecification.nameLike(name));
+        }
+        if (category!=null && !category.isEmpty()){
+            spec=spec.and(ProductSpecification.hasCategoryName(category));
+        }
+        if (maxPrice!=null && maxPrice>0){
+            spec=spec.and(ProductSpecification.priceLessThan(maxPrice));
+        }
         return productRepository.findAll(spec,pageable)
                 .map(productMapper::toProductResponseDto);
     }
