@@ -11,7 +11,6 @@ import com.conel.market.specifications.ProductSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.PredicateSpecification;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -126,21 +125,11 @@ public class ProductService {
                 .map(productMapper::toProductResponseDto);
     }
 
+    @Transactional
     public void deleteProduct(Integer id){
         Product product=productRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("Product not found"));
 
-        String fileName=product.getImageUrl();
-
-        if (fileName!=null){
-            try {
-
-                Path filePath= Paths.get("uploads").resolve(fileName);
-                Files.deleteIfExists(filePath);
-            }catch (IOException e){
-                System.out.println("Could not delete file: "+e.getMessage());
-            }
-        }
         productRepository.delete(product);
     }
 }

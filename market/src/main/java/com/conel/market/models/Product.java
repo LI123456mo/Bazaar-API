@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.SoftDelete;
 
 import java.util.List;
 
@@ -15,8 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @Entity
-@SQLDelete(sql="UPDATE product SET deleted = true where id=?")
-@SQLRestriction("deleted=false")
+@SoftDelete(columnName = "deleted")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 
 public class Product extends BaseEntity{
@@ -27,8 +27,6 @@ public class Product extends BaseEntity{
     private Integer stockQuantity;
 
     private String imageUrl;
-    @Column(nullable = false,columnDefinition = "boolean default false")
-    private boolean deleted=false;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")

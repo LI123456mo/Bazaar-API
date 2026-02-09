@@ -2,6 +2,7 @@ package com.conel.market.models;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -40,4 +41,7 @@ public class BaseEntity {
     @LastModifiedBy
     @Column(insertable = true)
     private String lastModifiedBy;
+
+    @Builder.Default
+    private boolean deleted=false;
 }

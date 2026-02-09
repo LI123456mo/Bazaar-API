@@ -9,12 +9,13 @@ import org.springframework.stereotype.Service;
 public class CategoryMapper {
     //WHAT THE ENTITY NEEDS
     public Category toCategory(CategoryDto dto){
-        var category=new Category();
-        category.setName(dto.name());
-        return category;
+        return Category.builder()
+                .name(dto.name())
+                .description(dto.description())
+                .build();
     }
     //WHAT THE USER NEEDS TO SEE
     public CategoryResponseDto tocategoryResponseDto(Category category){
-        return new CategoryResponseDto(category.getId(),category.getName(),category.getCreatedAt(),category.getCreatedBy());
+        return new CategoryResponseDto(category.getId(),category.getName(),category.getCreatedAt(),category.getCreatedBy(),category.getDescription());
     }
 }

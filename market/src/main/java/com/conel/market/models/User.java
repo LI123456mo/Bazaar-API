@@ -6,6 +6,8 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SoftDelete;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.List;
 @SuperBuilder
 @Entity
 @Table(name = "users")
+@SoftDelete(columnName = "deleted")
 public class User extends BaseEntity{
     private String firstName;
     private String lastName;

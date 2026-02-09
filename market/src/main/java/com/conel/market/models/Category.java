@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SoftDelete;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,11 +15,14 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
+@SoftDelete(columnName = "deleted")
 @Entity
 public class Category extends BaseEntity{
 
     @Column(unique = true,nullable = false,length = 50)
     private String name;
+
+    private String description;
 
     @OneToMany(mappedBy = "category")
     @ToString.Exclude
