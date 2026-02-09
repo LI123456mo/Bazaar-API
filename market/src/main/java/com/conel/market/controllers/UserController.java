@@ -4,6 +4,7 @@ import com.conel.market.dto.UserDto;
 import com.conel.market.dto.UserResponseDto;
 import com.conel.market.services.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,17 +16,23 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public UserResponseDto create(@RequestBody UserDto user){
-        return userService.saveUser(user);
+    public ResponseEntity<UserResponseDto> create(@RequestBody UserDto user){
+
+        UserResponseDto response= userService.saveUser(user);
+        return ResponseEntity.status(201).body(response);
     }
 
     @GetMapping("/{id}")
-    public UserResponseDto findById(@PathVariable Integer id){
-        return userService.findById(id);
+    public ResponseEntity<UserResponseDto > findById(@PathVariable Integer id){
+
+        UserResponseDto responseDto= userService.findById(id);
+        return ResponseEntity.ok(responseDto);
     }
 
     @GetMapping
-    public List<UserResponseDto> findAll(){
-        return userService.findAll();
+    public ResponseEntity<List<UserResponseDto>> findAll(){
+
+        List<UserResponseDto> response= userService.findAll();
+        return ResponseEntity.ok(response);
     }
 }

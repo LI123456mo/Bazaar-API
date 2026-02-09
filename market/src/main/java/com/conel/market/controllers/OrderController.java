@@ -4,6 +4,7 @@ import com.conel.market.dto.OrderDto;
 import com.conel.market.dto.OrderResponseDto;
 import com.conel.market.services.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,14 +16,19 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public OrderResponseDto create(@RequestBody OrderDto dto){
-        return orderService.createOrder(dto);
+    public ResponseEntity<OrderResponseDto> create(@RequestBody OrderDto dto){
+        OrderResponseDto response=orderService.createOrder(dto);
+        return ResponseEntity.status(201).body(response);
     }
     @GetMapping("/{id}")
-    public OrderResponseDto findById(@PathVariable Integer id) {
-        return orderService.findById(id);
+    public ResponseEntity<OrderResponseDto> findById(@PathVariable Integer id) {
+
+        OrderResponseDto responseDto=orderService.findById(id);
+        return ResponseEntity.ok(responseDto);
     }
-    @GetMapping List<OrderResponseDto> findAll(){
-        return orderService.findAll();
+    @GetMapping
+    public ResponseEntity<List<OrderResponseDto>> findAll(){
+        List<OrderResponseDto> response=orderService.findAll();
+        return ResponseEntity.ok(response);
     }
 }

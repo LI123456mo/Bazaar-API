@@ -43,8 +43,10 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ProductResponseDto findById(@PathVariable Integer id){
-        return productService.findById(id);
+    public ResponseEntity<ProductResponseDto> findById(@PathVariable Integer id){
+
+        ProductResponseDto response= productService.findById(id);
+        return ResponseEntity.ok(response);
     }
     @GetMapping
     public ResponseEntity<Page<ProductResponseDto>> findAll(
