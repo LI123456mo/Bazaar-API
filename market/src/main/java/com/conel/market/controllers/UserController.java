@@ -3,6 +3,7 @@ package com.conel.market.controllers;
 import com.conel.market.dto.UserDto;
 import com.conel.market.dto.UserResponseDto;
 import com.conel.market.services.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<UserResponseDto> create(@RequestBody UserDto user){
+    public ResponseEntity<UserResponseDto> create(@Valid @RequestBody UserDto user){
 
         UserResponseDto response= userService.saveUser(user);
         return ResponseEntity.status(201).body(response);

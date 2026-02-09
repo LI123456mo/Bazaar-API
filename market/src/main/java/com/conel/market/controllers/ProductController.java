@@ -5,6 +5,7 @@ import com.conel.market.dto.ProductResponseDto;
 import com.conel.market.file.FileStorageService;
 import com.conel.market.repositories.ProductRepository;
 import com.conel.market.services.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +29,7 @@ public class ProductController {
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<ProductResponseDto> createProduct(
-            @RequestPart("product") ProductDto requestDto,
+            @Valid @RequestPart("product") ProductDto requestDto,
             @RequestPart("file")MultipartFile file
             ){
         String fileName=fileStorageService.saveFile(file);

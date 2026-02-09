@@ -25,7 +25,7 @@ public class UserService {
 
     public UserResponseDto saveUser(UserDto dto){
         if (userRepository.existsByEmail(dto.email())){
-            throw new RuntimeException("User Already Exists!");
+            throw new RuntimeException("This email is already registered!");
         }
         User user=userMapper.toUser(dto);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
