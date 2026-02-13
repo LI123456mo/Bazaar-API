@@ -24,7 +24,7 @@ public class CategoryService {
            //The output                       //The input
     public CategoryResponseDto saveCategory(CategoryDto dto){
         var category=categoryMapper.toCategory(dto);
-        if (categoryRepository.existsByNameAndDeletedFalse(category.getName())){
+        if (categoryRepository.existsByName(category.getName())){
             throw new RuntimeException("An active category with the name '" + dto.name() + "' already exists!");
         }
         var saveCategory=categoryRepository.save(category);
@@ -61,10 +61,6 @@ public class CategoryService {
 
     @Transactional
     public void RestoreCategory(Integer id){
-        Category category=categoryRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("Category not found in archives"));
-
-        category.setDeleted(false);
-        categoryRepository.save(category);
+        categoryRepository.restoreById(id);
     }
 }

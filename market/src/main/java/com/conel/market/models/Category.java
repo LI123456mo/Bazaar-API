@@ -15,7 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@SoftDelete(columnName = "deleted")
 @Entity
 public class Category extends BaseEntity{
 

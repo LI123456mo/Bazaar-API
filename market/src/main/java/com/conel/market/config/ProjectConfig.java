@@ -29,7 +29,8 @@ public class ProjectConfig {
                         .requestMatchers("/api/v1/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .headers(headers -> headers.frameOptions(frame -> frame.disable())); // For H2 console if you use it
+                .headers(headers -> headers.frameOptions(frame -> frame.disable())) // For H2 console if you use it
+                .formLogin(Customizer.withDefaults());
 
         return http.build();
     }

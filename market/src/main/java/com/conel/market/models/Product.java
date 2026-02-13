@@ -15,10 +15,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-@Entity
-@SoftDelete(columnName = "deleted")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-
+@Entity
 public class Product extends BaseEntity{
     @Column(nullable = false)
     private String name;
@@ -28,7 +26,7 @@ public class Product extends BaseEntity{
 
     private String imageUrl;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

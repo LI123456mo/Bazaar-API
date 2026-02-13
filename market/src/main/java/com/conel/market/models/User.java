@@ -19,7 +19,6 @@ import java.util.List;
 @SuperBuilder
 @Entity
 @Table(name = "users")
-@SoftDelete(columnName = "deleted")
 public class User extends BaseEntity{
     private String firstName;
     private String lastName;

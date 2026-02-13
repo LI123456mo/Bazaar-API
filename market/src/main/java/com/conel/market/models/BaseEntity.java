@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SoftDelete;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @SuperBuilder
 @MappedSuperclass
+@SoftDelete(columnName = "deleted")
 @EntityListeners(AuditingEntityListener.class)
 public class BaseEntity {
 
@@ -41,7 +43,4 @@ public class BaseEntity {
     @LastModifiedBy
     @Column(insertable = true)
     private String lastModifiedBy;
-
-    @Builder.Default
-    private boolean deleted=false;
 }
