@@ -2,7 +2,6 @@ package com.conel.market.services;
 
 import com.conel.market.dto.UserDto;
 import com.conel.market.dto.UserResponseDto;
-import com.conel.market.mapper.UserMapper;
 import com.conel.market.models.User;
 import com.conel.market.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;

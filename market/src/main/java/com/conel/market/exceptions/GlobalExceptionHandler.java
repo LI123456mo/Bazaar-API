@@ -20,7 +20,6 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(RuntimeException.class)
-
     // Catch manual logic errors (like "Email already exists")
     public ResponseEntity<String> handleRuntime(RuntimeException ex){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());

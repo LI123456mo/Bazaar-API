@@ -30,6 +30,7 @@ public class UserController {
         return ResponseEntity.ok(responseDto);
     }
 
+
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> findAll(){
 

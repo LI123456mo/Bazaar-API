@@ -14,7 +14,9 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @Entity
 public class OrderItem extends BaseEntity{
+
     private Integer quantity;
+
     private Double priceAtPurchase;
 
     @ManyToOne(fetch = FetchType.LAZY)
