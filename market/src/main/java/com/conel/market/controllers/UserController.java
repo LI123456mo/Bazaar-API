@@ -1,40 +1,31 @@
 package com.conel.market.controllers;
 
-import com.conel.market.dto.UserDto;
-import com.conel.market.dto.UserResponseDto;
-import com.conel.market.services.UserService;
-import jakarta.validation.Valid;
+import com.conel.market.config.auth.AuthenticationRequest;
+import com.conel.market.config.auth.AuthenticationResponse;
+import com.conel.market.config.auth.AuthenticationService;
+import com.conel.market.config.auth.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/users")
+@RequestMapping("/api/v1/auth")
 public class UserController {
-    private final UserService userService;
+    private final AuthenticationService service;
 
-    @PostMapping
-    public ResponseEntity<UserResponseDto> create(@Valid @RequestBody UserDto user){
-
-        UserResponseDto response= userService.saveUser(user);
-        return ResponseEntity.status(201).body(response);
+    @PostMapping("/register")
+    public ResponseEntity<AuthenticationResponse> register(
+            @RequestBody RegisterRequest request
+    ){
+        return ResponseEntity.ok(service.register(request));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDto > findById(@PathVariable Integer id){
-
-        UserResponseDto responseDto= userService.findById(id);
-        return ResponseEntity.ok(responseDto);
-    }
-
-
-    @GetMapping
-    public ResponseEntity<List<UserResponseDto>> findAll(){
-
-        List<UserResponseDto> response= userService.findAll();
-        return ResponseEntity.ok(response);
+    @PostMapping("/authenticate")
+    public ResponseEntity<AuthenticationResponse> authenticate(
+            @RequestBody AuthenticationRequest request
+    ){
+        return ResponseEntity.ok(service.authenticate(request));
     }
 }
