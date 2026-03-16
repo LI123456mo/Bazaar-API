@@ -1,6 +1,6 @@
 package com.conel.market.validation;
 
-import com.conel.market.dto.UserDto;
+import com.conel.market.config.auth.RegisterRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
@@ -11,7 +11,9 @@ public class PasswordMatchValidator implements ConstraintValidator<PasswordMatch
     }
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext context){
-        UserDto userDto=(UserDto) value;
-        return userDto.password() != null && userDto.password().equals(userDto.confirmPassword());
+        if (!(value instanceof RegisterRequest request)){
+            return false;
+        }
+        return request.getPassword() != null && request.getPassword().equals(request.getConfirmPassword());
     }
 }

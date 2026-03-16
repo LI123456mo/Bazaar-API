@@ -15,6 +15,6 @@ public class CategoryMapper {
     }
     //WHAT THE USER NEEDS TO SEE
     public CategoryResponseDto tocategoryResponseDto(Category category){
-        return new CategoryResponseDto(category.getId(),category.getName(),category.getCreatedAt(),category.getCreatedBy());
+        return new CategoryResponseDto(category.getId(),category.getName(),category.getCreatedAt(),category.getCreatedBy(), category.getDescription());
     }
 }

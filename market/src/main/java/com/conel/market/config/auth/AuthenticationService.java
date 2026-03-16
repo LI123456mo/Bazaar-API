@@ -20,6 +20,9 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request){
+        if (!request.getPassword().equals(request.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match");
+        }
         var user= User.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())

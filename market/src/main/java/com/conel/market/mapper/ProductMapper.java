@@ -32,6 +32,7 @@ public class ProductMapper {
                 product.getStockQuantity(),
                 //If category exists ,get its name , else , null
                 product.getCategory()!=null?product.getCategory().getName():null,
+                product.getImageUrl(),
                 product.getCreatedAt()
         );
     }

@@ -4,6 +4,7 @@ import com.conel.market.config.auth.AuthenticationRequest;
 import com.conel.market.config.auth.AuthenticationResponse;
 import com.conel.market.config.auth.AuthenticationService;
 import com.conel.market.config.auth.RegisterRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(
-            @RequestBody RegisterRequest request
+            @Valid @RequestBody RegisterRequest request
     ){
         return ResponseEntity.ok(service.register(request));
     }

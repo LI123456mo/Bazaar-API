@@ -1,7 +1,7 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/limo_market
-    username: conellimo
+    username: postgres
     password: devpass123
     driver-class-name: org.postgresql.Driver
 
@@ -19,8 +19,3 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
-
-  security:
-    user:
-      name: admin
-      password: "1234"

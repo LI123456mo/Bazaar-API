@@ -3,10 +3,12 @@ package com.conel.market.services;
 import com.conel.market.dto.OrderDto;
 import com.conel.market.dto.OrderItemDto;
 import com.conel.market.dto.OrderResponseDto;
+import com.conel.market.mapper.OrderMapper;
 import com.conel.market.models.*;
 import com.conel.market.repositories.OrderItemRepository;
 import com.conel.market.repositories.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +21,13 @@ public class OrderService{
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ProductService productService;
+    private final OrderMapper orderMapper;
     @Transactional
     public OrderResponseDto createOrder(OrderDto dto){
-        //GET USER WHO IS BUYING
-        User user=userService.getUserEntity(dto.userId());
+
+        User user = (User) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
 
         Order order=Order.builder()
                 .user(user)
