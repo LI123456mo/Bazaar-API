@@ -3,7 +3,6 @@ package com.conel.market.services;
 import com.conel.market.dto.OrderDto;
 import com.conel.market.dto.OrderItemDto;
 import com.conel.market.dto.OrderResponseDto;
-import com.conel.market.mapper.OrderMapper;
 import com.conel.market.models.*;
 import com.conel.market.repositories.OrderItemRepository;
 import com.conel.market.repositories.OrderRepository;
@@ -20,9 +19,6 @@ public class OrderService{
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final ProductService productService;
-    private final UserService userService;
-    private final OrderMapper orderMapper;
-
     @Transactional
     public OrderResponseDto createOrder(OrderDto dto){
         //GET USER WHO IS BUYING
