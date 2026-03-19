@@ -1,7 +1,7 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/limo_market
-    username: postgres
+    username: conellimo
     password: devpass123
     driver-class-name: org.postgresql.Driver
 
