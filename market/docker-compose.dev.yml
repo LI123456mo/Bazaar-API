@@ -1,0 +1,16 @@
+services:
+  postgres-sql-market-app:
+    container_name: market_container
+    image: postgres:17.5
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: /data/postgres
+      POSTGRES_DB:
+    volumes:
+      - database_backup:/data/postgres
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+volumes:
+  database_backup:
