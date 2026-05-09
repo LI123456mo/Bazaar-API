@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: market
+  profiles:
+    active: local
+  config:
+    import: optional:file:.env[.properties]
