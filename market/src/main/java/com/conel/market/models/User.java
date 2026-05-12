@@ -44,6 +44,11 @@ public class User implements UserDetails {
     @EqualsAndHashCode.Exclude
     private List<Order> orderList=new ArrayList<>();
 
+    @OneToMany(mappedBy = "user")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<Address> addresses;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
