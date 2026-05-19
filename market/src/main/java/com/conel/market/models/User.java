@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,13 +32,38 @@ public class User implements UserDetails {
 
     private String lastName;
 
-    @Column(unique = true,nullable = false)
+
     private String email;
+
+    private String phoneNumber;
 
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    private boolean enabled;
+
+    private boolean locked;
+
+    private boolean credentialsExpired;
+
+    private boolean emailVerified;
+
+    private boolean phoneVerified;
+
+
+    @ManyToMany(
+            cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+            fetch = FetchType.EAGER
+    )
+    @JoinTable(
+            name = "USERS_ROLES",
+            joinColumns = {
+                    @JoinColumn(name = "users_id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "roles_id")
+            }
+    )
+    private List<Role> roles=new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
     @ToString.Exclude
@@ -51,7 +77,12 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        if (CollectionUtils.isEmpty(this.roles)){
+            return List.of();
+        }
+        return  this.roles.stream()
+                .map(r->new SimpleGrantedAuthority(r.getName()))
+                .toList();
     }
 
     @Override

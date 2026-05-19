@@ -1,4 +1,4 @@
-package com.conel.market.controllers;
+package com.conel.market.auth;
 
 import com.conel.market.config.auth.AuthenticationRequest;
 import com.conel.market.config.auth.AuthenticationResponse;
