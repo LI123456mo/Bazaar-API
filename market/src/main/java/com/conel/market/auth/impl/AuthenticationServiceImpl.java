@@ -5,7 +5,7 @@ import com.conel.market.auth.request.AuthenticationRequest;
 import com.conel.market.auth.request.RefreshRequest;
 import com.conel.market.auth.request.RegistrationRequest;
 import com.conel.market.auth.response.AuthenticationResponse;
-import com.conel.market.config.JwtService;
+import com.conel.market.security.JwtService;
 import com.conel.market.mapper.UserMapper;
 import com.conel.market.models.Role;
 import com.conel.market.models.User;

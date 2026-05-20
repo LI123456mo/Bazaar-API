@@ -1,4 +1,4 @@
-package com.conel.market.config;
+package com.conel.market.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
