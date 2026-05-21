@@ -80,11 +80,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse refreshToken(RefreshRequest request) {
-        final String newAccessToken=this.jwtService.refreshAccessToken(req.getRefreshToken());
+        final String newAccessToken=this.jwtService.refreshAccessToken(request.getRefreshToken());
         final String tokenType="Bearer";
         return AuthenticationResponse.builder()
                 .accessToken(newAccessToken)
-                .refreshToken(req.getRefreshToken())
+                .refreshToken(request.getRefreshToken())
                 .tokenType(tokenType)
                 .build();
     }
