@@ -13,7 +13,7 @@ public class KeyUtils {
 
     private KeyUtils(){}
 
-    private static PrivateKey loadPrivateKey(final String pemPath) throws NoSuchAlgorithmException {
+    public static PrivateKey loadPrivateKey(final String pemPath) throws Exception {
         final String key = readKeyFromResource(pemPath).replace("-----BEGIN PRIVATE KEY-----", "")
                 .replace("-----END PRIVATE KEY-----", "")
                 .replaceAll("\\s", "");

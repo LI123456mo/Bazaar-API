@@ -5,3 +5,9 @@ spring:
     active: local
   config:
     import: optional:file:.env[.properties]
+
+app:
+  security:
+    jwt:
+      access-token-expiration: 86400000 #24 hours for local testing #900000 # 15 minutes
+      refresh-token-expiration: 604800000 # 7 days
