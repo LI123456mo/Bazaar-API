@@ -24,17 +24,17 @@ public class BeansConfig {
                 .orElseThrow(()->new UsernameNotFoundException("User not Found"));
     }
 
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService());
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
+//    @Bean
+//    public AuthenticationProvider authenticationProvider() {
+//        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService());
+//        authProvider.setPasswordEncoder(passwordEncoder());
+//        return authProvider;
+//    }
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config){
-        return config.getAuthenticationManager();
-    }
+//    @Bean
+//    public AuthenticationManager authenticationManager(AuthenticationConfiguration config){
+//        return config.getAuthenticationManager();
+//    }
 
     @Bean
     public PasswordEncoder passwordEncoder(){

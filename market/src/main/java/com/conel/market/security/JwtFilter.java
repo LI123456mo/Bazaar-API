@@ -46,17 +46,21 @@ public class JwtFilter extends OncePerRequestFilter {
             final UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
             if (this.jwtService.isTokenValid(jwt, userDetails.getUsername())) {
+                                                                     //This constructor should only be used by
+                                                                     //AuthenticationManager or AuthenticationProvider implementations
+                                                                     //that are satisfied with producing a trusted
+                                                                     // (i.e. isAuthenticated() = true) authentication token.
                 final UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
                         userDetails.getAuthorities());
 
+                //Records the remote address and will also set the session Id if a session already exists (it won't create one).
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
-
         filterChain.doFilter(request, response);
     }
 }
