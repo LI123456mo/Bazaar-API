@@ -1,8 +1,7 @@
-package com.conel.market.mapper;
+package com.conel.market.user;
 
 
 import com.conel.market.auth.request.RegistrationRequest;
-import com.conel.market.models.User;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;

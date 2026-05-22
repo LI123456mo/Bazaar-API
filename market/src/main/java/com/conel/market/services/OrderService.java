@@ -7,6 +7,7 @@ import com.conel.market.mapper.OrderMapper;
 import com.conel.market.models.*;
 import com.conel.market.repositories.OrderItemRepository;
 import com.conel.market.repositories.OrderRepository;
+import com.conel.market.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
