@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.CollectionUtils;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -37,6 +38,8 @@ public class User implements UserDetails {
     private String phoneNumber;
 
     private String password;
+
+    private LocalDate dateOfBirth;
 
     private boolean enabled;
 
