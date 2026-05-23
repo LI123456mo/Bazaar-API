@@ -1,7 +1,7 @@
-package com.conel.market.user;
+package com.conel.market.models.user;
 
-import com.conel.market.user.request.ChangePasswordRequest;
-import com.conel.market.user.request.ProfileUpdateRequest;
+import com.conel.market.models.user.request.ChangePasswordRequest;
+import com.conel.market.models.user.request.ProfileUpdateRequest;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService {

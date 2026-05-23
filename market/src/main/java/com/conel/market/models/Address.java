@@ -1,6 +1,6 @@
 package com.conel.market.models;
 
-import com.conel.market.user.User;
+import com.conel.market.models.user.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;

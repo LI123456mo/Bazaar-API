@@ -1,6 +1,6 @@
 package com.conel.market.config;
 
-import com.conel.market.user.UserRepository;
+import com.conel.market.models.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,13 +1,13 @@
-package com.conel.market.user.impl;
+package com.conel.market.models.user.impl;
 
 import com.conel.market.exception.BusinessException;
 import com.conel.market.exception.ErrorCode;
-import com.conel.market.user.User;
-import com.conel.market.user.UserMapper;
-import com.conel.market.user.UserRepository;
-import com.conel.market.user.UserService;
-import com.conel.market.user.request.ChangePasswordRequest;
-import com.conel.market.user.request.ProfileUpdateRequest;
+import com.conel.market.models.user.User;
+import com.conel.market.models.user.UserMapper;
+import com.conel.market.models.user.UserRepository;
+import com.conel.market.models.user.UserService;
+import com.conel.market.models.user.request.ChangePasswordRequest;
+import com.conel.market.models.user.request.ProfileUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

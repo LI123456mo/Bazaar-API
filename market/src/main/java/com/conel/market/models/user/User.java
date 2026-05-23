@@ -1,4 +1,4 @@
-package com.conel.market.user;
+package com.conel.market.models.user;
 
 import com.conel.market.models.Address;
 import com.conel.market.models.Order;

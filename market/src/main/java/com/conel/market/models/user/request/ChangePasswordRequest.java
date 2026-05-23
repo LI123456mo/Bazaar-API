@@ -1,4 +1,4 @@
-package com.conel.market.user.request;
+package com.conel.market.models.user.request;
 
 
 import lombok.*;

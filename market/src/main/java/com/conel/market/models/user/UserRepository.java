@@ -1,4 +1,4 @@
-package com.conel.market.user;
+package com.conel.market.models.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
