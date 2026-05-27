@@ -1,11 +1,9 @@
 package com.conel.market.models;
 
+import com.conel.market.models.category.Category;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
-import org.hibernate.annotations.SoftDelete;
 
 import java.util.List;
 

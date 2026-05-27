@@ -3,7 +3,7 @@ package com.conel.market.services;
 import com.conel.market.dto.ProductDto;
 import com.conel.market.dto.ProductResponseDto;
 import com.conel.market.mapper.ProductMapper;
-import com.conel.market.models.Category;
+import com.conel.market.models.category.Category;
 import com.conel.market.models.Product;
 import com.conel.market.repositories.CategoryRepository;
 import com.conel.market.repositories.ProductRepository;

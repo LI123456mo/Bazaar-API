@@ -1,9 +1,7 @@
 package com.conel.market.services;
 
-import com.conel.market.dto.CategoryDto;
-import com.conel.market.dto.CategoryResponseDto;
-import com.conel.market.mapper.CategoryMapper;
-import com.conel.market.models.Category;
+import com.conel.market.models.category.impl.CategoryMapper;
+import com.conel.market.models.category.Category;
 import com.conel.market.models.Product;
 import com.conel.market.repositories.CategoryRepository;
 import com.conel.market.repositories.ProductRepository;
@@ -22,7 +20,7 @@ public class CategoryService {
 
     //SAVE
            //The output                       //The input
-    public CategoryResponseDto saveCategory(CategoryDto dto){
+    public CategoryResponseDto saveCategory(CategoryRequest dto){
         var category=categoryMapper.toCategory(dto);
         if (categoryRepository.existsByName(category.getName())){
             throw new RuntimeException("An active category with the name '" + dto.name() + "' already exists!");

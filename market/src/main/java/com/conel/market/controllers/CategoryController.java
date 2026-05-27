@@ -1,7 +1,5 @@
 package com.conel.market.controllers;
 
-import com.conel.market.dto.CategoryDto;
-import com.conel.market.dto.CategoryResponseDto;
 import com.conel.market.services.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +13,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public CategoryResponseDto create(@RequestBody CategoryDto category){
+    public CategoryResponseDto create(@RequestBody CategoryRequest category){
         return categoryService.saveCategory(category);
     }
 

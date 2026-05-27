@@ -1,6 +1,6 @@
 package com.conel.market.repositories;
 
-import com.conel.market.models.Category;
+import com.conel.market.models.category.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;

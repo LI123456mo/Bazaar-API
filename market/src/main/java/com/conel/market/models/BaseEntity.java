@@ -31,7 +31,7 @@ public class BaseEntity {
             sequenceName = "base_sequence",
             allocationSize = 1
     )
-    private Integer id;
+    private String id;
 
     @CreatedDate
     @Column(updatable = false,nullable = false)
