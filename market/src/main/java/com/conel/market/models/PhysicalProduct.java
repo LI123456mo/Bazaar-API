@@ -1,5 +1,6 @@
 package com.conel.market.models;
 
+import com.conel.market.models.products.Product;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 @Entity
-public class PhysicalProduct extends Product{
+public class PhysicalProduct extends Product {
 
     @Column(nullable = false)
     private Double weight;

@@ -1,5 +1,6 @@
 package com.conel.market.models;
 
+import com.conel.market.models.products.Product;
 import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 @Entity
-public class DigitalProduct extends Product{
+public class DigitalProduct extends Product {
     private String downloadUrl;
     private Integer fileSize;
 }

@@ -1,9 +1,8 @@
-package com.conel.market.mapper;
+package com.conel.market.models.products;
 
 import com.conel.market.dto.ProductDto;
 import com.conel.market.dto.ProductResponseDto;
 import com.conel.market.models.category.Category;
-import com.conel.market.models.Product;
 import org.springframework.stereotype.Service;
 
 @Service

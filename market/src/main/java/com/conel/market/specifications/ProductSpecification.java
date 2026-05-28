@@ -1,6 +1,6 @@
 package com.conel.market.specifications;
 
-import com.conel.market.models.Product;
+import com.conel.market.models.products.Product;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;

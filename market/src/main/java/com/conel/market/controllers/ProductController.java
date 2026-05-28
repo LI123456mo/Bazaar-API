@@ -3,8 +3,8 @@ package com.conel.market.controllers;
 import com.conel.market.dto.ProductDto;
 import com.conel.market.dto.ProductResponseDto;
 import com.conel.market.file.FileStorageService;
-import com.conel.market.repositories.ProductRepository;
-import com.conel.market.services.ProductService;
+import com.conel.market.models.products.ProductRepository;
+import com.conel.market.models.products.ProductService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,8 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/auth/products")

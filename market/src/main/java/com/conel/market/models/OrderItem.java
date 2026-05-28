@@ -1,5 +1,6 @@
 package com.conel.market.models;
 
+import com.conel.market.models.products.Product;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;

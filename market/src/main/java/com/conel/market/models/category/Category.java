@@ -1,7 +1,7 @@
 package com.conel.market.models.category;
 
 import com.conel.market.models.BaseEntity;
-import com.conel.market.models.Product;
+import com.conel.market.models.products.Product;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;

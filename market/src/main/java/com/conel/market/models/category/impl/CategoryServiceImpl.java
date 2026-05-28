@@ -8,7 +8,7 @@ import com.conel.market.models.category.CategoryService;
 import com.conel.market.models.category.dto.request.CategoryRequest;
 import com.conel.market.models.category.dto.request.CategoryUpdateRequest;
 import com.conel.market.models.category.dto.response.CategoryResponse;
-import com.conel.market.repositories.ProductRepository;
+import com.conel.market.models.products.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
