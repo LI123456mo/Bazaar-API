@@ -1,14 +1,12 @@
-package com.conel.market.services;
+package com.conel.market.models.order;
 
-import com.conel.market.dto.OrderDto;
+import com.conel.market.models.order.dto.OrderDto;
 import com.conel.market.dto.OrderItemDto;
-import com.conel.market.dto.OrderResponseDto;
-import com.conel.market.mapper.OrderMapper;
+import com.conel.market.models.order.dto.OrderResponseDto;
 import com.conel.market.models.*;
 import com.conel.market.models.products.Product;
 import com.conel.market.models.products.ProductService;
 import com.conel.market.repositories.OrderItemRepository;
-import com.conel.market.repositories.OrderRepository;
 import com.conel.market.models.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;

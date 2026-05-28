@@ -1,8 +1,8 @@
 package com.conel.market.controllers;
 
-import com.conel.market.dto.OrderDto;
-import com.conel.market.dto.OrderResponseDto;
-import com.conel.market.services.OrderService;
+import com.conel.market.models.order.dto.OrderDto;
+import com.conel.market.models.order.dto.OrderResponseDto;
+import com.conel.market.models.order.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,38 +1,55 @@
 package com.conel.market.models.products;
 
-import com.conel.market.dto.ProductDto;
-import com.conel.market.dto.ProductResponseDto;
 import com.conel.market.models.category.Category;
+import com.conel.market.models.products.dto.ProductRequest;
+import com.conel.market.models.products.dto.ProductResponse;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ProductMapper {
-    //WHAT ENTITY NEEDS
-    public Product toProduct(ProductDto dto){
-        var product=new Product();
-        product.setName(dto.name());
-        product.setStockQuantity(dto.stockQuantity());
-        product.setPrice(dto.price());
-        product.setDescription(dto.description());
 
-        var category=new Category();
-        category.setId(dto.categoryId());
-        product.setCategory(category);//Linking
+    // Converts incoming Request payloads into database Entities
+    public Product toProduct(ProductRequest dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        var product = new Product();
+        product.setName(dto.name());
+        product.setDescription(dto.description());
+        product.setPrice(dto.price());
+        product.setStockQuantity(dto.stockQuantity());
+        product.setImageUrl(dto.imageUrl());
+
+        if (dto.categoryId() != null) {
+            var category = new Category();
+            category.setId(dto.categoryId());
+            product.setCategory(category);
+        }
+
         return product;
     }
 
-    //WHAT THE USER NEEDS TO SEE
-    public ProductResponseDto toProductResponseDto(Product product){
-        return new ProductResponseDto(
+    public ProductResponse toProductResponseDto(Product product) {
+        if (product == null) {
+            return null;
+        }
+
+        String categoryId = null;
+        String categoryName = null;
+
+        if (product.getCategory() != null) {
+            categoryId = product.getCategory().getId();
+            categoryName = product.getCategory().getName();
+        }
+
+        return new ProductResponse(
                 product.getId(),
                 product.getName(),
-                product.getDescription(),
                 product.getPrice(),
-                product.getStockQuantity(),
-                //If category exists ,get its name , else , null
-                product.getCategory()!=null?product.getCategory().getName():null,
                 product.getImageUrl(),
-                product.getCreatedAt()
+                categoryName,
+                product.getCreatedBy() != null ? product.getCreatedBy() : "Marketplace Merchant"
         );
     }
 }

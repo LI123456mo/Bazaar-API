@@ -1,7 +1,7 @@
 package com.conel.market.models.user;
 
 import com.conel.market.models.Address;
-import com.conel.market.models.Order;
+import com.conel.market.models.order.Order;
 import com.conel.market.models.Role;
 import jakarta.persistence.*;
 import lombok.*;

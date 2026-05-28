@@ -1,10 +1,9 @@
 package com.conel.market.controllers;
 
-import com.conel.market.dto.ProductDto;
-import com.conel.market.dto.ProductResponseDto;
 import com.conel.market.file.FileStorageService;
-import com.conel.market.models.products.ProductRepository;
 import com.conel.market.models.products.ProductService;
+import com.conel.market.models.products.dto.ProductRequest;
+import com.conel.market.models.products.dto.ProductResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,77 +13,86 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/v1/auth/products")
+@RequestMapping("/api/v1/products") // REST best practice: open catalog endpoint prefix
 @RequiredArgsConstructor
 public class ProductController {
+
     private final ProductService productService;
-    private final ProductRepository productRepository;
     private final FileStorageService fileStorageService;
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<ProductResponseDto> createProduct(
-            @Valid @RequestPart("product") ProductDto requestDto,
-            @RequestPart("file")MultipartFile file
-            ){
-        String fileName=fileStorageService.saveFile(file);
-        ProductResponseDto response=productService.saveProduct(requestDto,fileName);
+    @PreAuthorize("hasRole('SELLER') or hasRole('ADMIN')") // Secures listing creation to authorized roles
+    public ResponseEntity<ProductResponse> createProduct(
+            @Valid @RequestPart("product") ProductRequest requestDto,
+            @RequestPart("file") MultipartFile file,
+            @AuthenticationPrincipal Object principal // Extract authenticated merchant details safely
+    ) {
+        String fileName = fileStorageService.saveFile(file);
+
+        // Pass a dummy or mapped string for now. Later use: ((User) principal).getId()
+        String currentUserId = "system-merchant";
+
+        ProductResponse response = productService.saveProduct(requestDto, fileName, currentUserId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PutMapping(value = "/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PreAuthorize("hasRole('SELLER') or hasRole('ADMIN')")
+    public ResponseEntity<ProductResponse> updateProduct(
+            @PathVariable("id") String id, // FIXED: String ID type matching UUID
+            @RequestPart("product") ProductRequest dto,
+            @RequestPart(value = "file", required = false) MultipartFile file
+    ) {
+        String fileName = null;
+        if (file != null && !file.isEmpty()) {
+            fileName = fileStorageService.saveFile(file);
+        }
+        ProductResponse response = productService.updateProduct(id, dto, fileName);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}")
+    // Public access allows standard customers to view specific product item details pages
+    public ResponseEntity<ProductResponse> findById(@PathVariable("id") String id) {
+        ProductResponse response = productService.findById(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping
+    // Public entrypoint mapping for search grids and dynamic home lists
+    public ResponseEntity<Page<ProductResponse>> findAll(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) String category,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id,asc") String sort
+    ) {
+        Pageable pageable = PageRequest.of(page, size, parseSort(sort));
+        Page<ProductResponse> results = productService.searchProducts(name, maxPrice, category, pageable);
+        return ResponseEntity.ok(results);
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id){
+    @PreAuthorize("hasRole('SELLER') or hasRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable("id") String id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ProductResponseDto> findById(@PathVariable Integer id){
-
-        ProductResponseDto response= productService.findById(id);
-        return ResponseEntity.ok(response);
-    }
-    @GetMapping
-    public ResponseEntity<Page<ProductResponseDto>> findAll(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) Double maxPrice,
-            @RequestParam(required = false) String category,
-            @RequestParam(defaultValue = "0") int page, // Default to first page
-            @RequestParam(defaultValue = "10") int size, // Default to 10 items
-            @RequestParam(defaultValue = "id,asc") String sort // Default sort
-    ) {
-        //  building the Pageable object here
-        Pageable pageable = PageRequest.of(page, size,(parseSort(sort)));
-
-        Page<ProductResponseDto> results=productService.searchProducts(name,maxPrice,category,pageable);
-
-        return ResponseEntity.ok(results);
-    }
-
-    @PutMapping(value = "/{id}",consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<ProductResponseDto> updateStock(
-            @PathVariable Integer id,
-            @RequestPart("product") ProductDto dto,
-            @RequestPart(value = "file",required = false)MultipartFile file
-    ){
-        String fileName=null;
-        if (file!=null && !file.isEmpty()){
-            fileName=fileStorageService.saveFile(file);
-        }
-        ProductResponseDto response=productService.updateProduct(id,dto,fileName);
-        return ResponseEntity.ok(response);
-    }
-
-    private  Sort parseSort(String sort){
-        String[] parts=sort.split(",");
-        String property=parts[0];
-        String direction=(parts.length>1)?parts[1]:"asc";
+    private Sort parseSort(String sort) {
+        String[] parts = sort.split(",");
+        String property = parts[0];
+        String direction = (parts.length > 1) ? parts[1] : "asc";
 
         return direction.equalsIgnoreCase("desc")
-                ?Sort.by(property).descending()
-                :Sort.by(property).ascending();
+                ? Sort.by(property).descending()
+                : Sort.by(property).ascending();
     }
 }
