@@ -21,7 +21,7 @@ public class Product extends BaseEntity{
     private String description;
     private Double price;
     private Integer stockQuantity;
-
+    private boolean active = true;
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.EAGER)

@@ -24,6 +24,7 @@ public class Category extends BaseEntity {
 
     @Column(name = "DESCRIPTION", nullable = false)
     private String description;
+    private boolean active = true;
 
     @OneToMany(mappedBy = "category")
     @ToString.Exclude

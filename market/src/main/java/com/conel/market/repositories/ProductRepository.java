@@ -16,4 +16,12 @@ public interface ProductRepository extends JpaRepository<Product,Integer> , JpaS
     List<Product> findAllByNameIgnoreCaseStartingWith(String name);
     List<Product> findAllByNameIgnoreCaseEndsWith(String name);
     List<Product> findAllByNameInIgnoreCase(List<String> name);
+
+    @Modifying
+    @Query("""
+            UPDATE Product p 
+            SET p.active = false 
+            WHERE p.category.id = :categoryId
+           """)
+    void archiveAllByCategoryId(@Param("categoryId")String categoryId);
 }

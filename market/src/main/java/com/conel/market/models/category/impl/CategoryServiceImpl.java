@@ -8,9 +8,11 @@ import com.conel.market.models.category.CategoryService;
 import com.conel.market.models.category.dto.request.CategoryRequest;
 import com.conel.market.models.category.dto.request.CategoryUpdateRequest;
 import com.conel.market.models.category.dto.response.CategoryResponse;
+import com.conel.market.repositories.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -20,6 +22,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final ProductRepository productRepository;
 
     @Override
     public String createCategory(final CategoryRequest request) {
@@ -61,8 +64,16 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void deleteCategoryById(String catId) {
-        //TODO
-        //To be implemented
+        Category category=categoryRepository.findById(catId)
+                .orElseThrow(()->new EntityNotFoundException("category not found"));
+        category.setActive(false);
+        productRepository.archiveAllByCategoryId(catId);
+        categoryRepository.save(category);
+    }
+
+    @Transactional
+    public void RestoreCategory(String id){
+        categoryRepository.restoreById(id);
     }
 
     private void checkCategoryGlobalUnicity(String name) {
