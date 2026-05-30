@@ -1,89 +1,110 @@
 package com.conel.market.models.order;
 
-import com.conel.market.models.order.dto.OrderDto;
-import com.conel.market.dto.OrderItemDto;
-import com.conel.market.models.order.dto.OrderResponseDto;
+import com.conel.market.models.order.dto.request.OrderRequest;
+import com.conel.market.models.order.dto.response.OrderItemRequest;
+import com.conel.market.models.order.dto.response.OrderItemResponse;
+import com.conel.market.models.order.dto.response.OrderResponse;
 import com.conel.market.models.products.Product;
 import com.conel.market.models.products.ProductService;
-import com.conel.market.repositories.OrderItemRepository;
 import com.conel.market.models.user.User;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class OrderService{
+public class OrderService {
+
     private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
     private final ProductService productService;
-    private final OrderMapper orderMapper;
+
     @Transactional
-    public OrderResponseDto createOrder(OrderDto dto){
-
-        User user = (User) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-
-        Order order=Order.builder()
-                .user(user)
+    public OrderResponse placeOrder(OrderRequest request) {
+        Order order = Order.builder()
+                .status(OrderStatus.PENDING)
+                .paymentMethod(request.paymentMethod())
+                .shippingAddress(request.shippingAddress())
+                .user(User.builder().id(request.userId()).build())
+                .orderItems(new ArrayList<>())
                 .totalAmount(0.0)
-                .status(OrderStatus.COMPLETED)
-                .createdAt(LocalDateTime.now())
-                .createdBy("system")
                 .build();
 
-        //SAVE , SO THERE IS ID TO LINK TO ITEMS
-        Order savedOrder=orderRepository.save(order);
+        double runningTotalAmount = 0.0;
+        List<OrderItemResponse> responseItemsList = new ArrayList<>();
 
-        double finalTotal=0.0;
+        for (OrderItemRequest itemDto : request.items()) {
+            Product product = productService.getProductEntity(itemDto.productId());
 
-        for(OrderItemDto itemDto: dto.items()){
-            //FIND THE PRODUCT FOR THIS SPECIFIC ITEM
-            Product product=productService.getProductEntity(itemDto.productId());
+            if (!product.isActive()) {
+                throw new IllegalArgumentException("Cannot purchase archived product: " + product.getName());
+            }
 
-            //CHECK STOCK AND DECREASE IT
-            productService.decreaseStock(product.getId(),itemDto.quantity());
+            productService.decreaseStock(product.getId(), itemDto.quantity());
 
-            //CREATE THE LINE ITEM FOR RECEIPT
-            OrderItem orderItem=OrderItem.builder()
-                    .order(savedOrder)
+            double itemPriceAtPurchase = product.getPrice();
+            double itemSubTotal = itemPriceAtPurchase * itemDto.quantity();
+            runningTotalAmount += itemSubTotal;
+
+            OrderItem orderItem = OrderItem.builder()
+                    .order(order)
                     .product(product)
                     .quantity(itemDto.quantity())
-                    .priceAtPurchase(product.getPrice())
-                    .createdAt(LocalDateTime.now())
-                    .createdBy("system")
+                    .priceAtPurchase(itemPriceAtPurchase) // Lock in historical price
                     .build();
 
-            //SAVE THE LINE ITEM
-            OrderItem savedItem =orderItemRepository.save(orderItem);
-            savedOrder.getOrderItems().add(savedItem);
+            order.getOrderItems().add(orderItem);
 
-            //ADD  ITEM COST TO RUNNING TOTAL
-            finalTotal+=(product.getPrice()*itemDto.quantity());
+            responseItemsList.add(new OrderItemResponse(
+                    product.getId(),
+                    product.getName(),
+                    itemPriceAtPurchase,
+                    itemDto.quantity(),
+                    itemSubTotal
+            ));
         }
-        //UPDATE TOTAL AMOUNT ON THE MAIN ORDER
-        savedOrder.setTotalAmount(finalTotal);
-        orderRepository.save(savedOrder);
 
-        //FULL RECEIPT
-        return orderMapper.toOrderResponseDto(savedOrder);
+        order.setTotalAmount(runningTotalAmount);
+
+
+        Order savedOrder = orderRepository.save(order);
+
+
+        return new OrderResponse(
+                savedOrder.getId(),
+                savedOrder.getTotalAmount(),
+                savedOrder.getStatus().name(),
+                savedOrder.getPaymentMethod(),
+                savedOrder.getShippingAddress(),
+                responseItemsList
+        );
     }
 
-    public OrderResponseDto findById(Integer id){
-        return orderRepository.findById(id)
-                .map(orderMapper::toOrderResponseDto)
-                .orElseThrow(()->new RuntimeException("Order not found with id:" + id));
-    }
+    @Transactional(readOnly = true)
+    public OrderResponse getOrderById(String orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new EntityNotFoundException("Order not found with ID: " + orderId));
 
-    public List<OrderResponseDto> findAll() {
-        return orderRepository.findAll()
-                .stream()
-                .map(orderMapper::toOrderResponseDto)
+        List<OrderItemResponse> itemResponses = order.getOrderItems().stream()
+                .map(item -> new OrderItemResponse(
+                        item.getProduct().getId(),
+                        item.getProduct().getName(),
+                        item.getPriceAtPurchase(),
+                        item.getQuantity(),
+                        item.getPriceAtPurchase() * item.getQuantity()
+                ))
                 .toList();
+
+        return new OrderResponse(
+                order.getId(),
+                order.getTotalAmount(),
+                order.getStatus().name(),
+                order.getPaymentMethod(),
+                order.getShippingAddress(),
+                itemResponses
+        );
     }
 }
