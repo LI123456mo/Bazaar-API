@@ -1,5 +1,6 @@
-package com.conel.market.models.order.dto;
+package com.conel.market.models.order.dto.request;
 
+import com.conel.market.models.order.dto.response.OrderItemRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotBlank;

@@ -1,6 +1,6 @@
-package com.conel.market.models;
+package com.conel.market.models.order;
 
-import com.conel.market.models.order.Order;
+import com.conel.market.models.BaseEntity;
 import com.conel.market.models.products.Product;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 @Entity
-public class OrderItem extends BaseEntity{
+public class OrderItem extends BaseEntity {
 
     private Integer quantity;
 

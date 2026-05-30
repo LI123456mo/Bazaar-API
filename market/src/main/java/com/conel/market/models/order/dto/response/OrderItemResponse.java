@@ -1,4 +1,4 @@
-package com.conel.market.models.order.dto;
+package com.conel.market.models.order.dto.response;
 
 public record OrderItemResponse(
         String productId,

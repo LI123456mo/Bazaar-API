@@ -1,8 +1,6 @@
 package com.conel.market.models.order;
 
 import com.conel.market.models.BaseEntity;
-import com.conel.market.models.OrderItem;
-import com.conel.market.models.OrderStatus;
 import com.conel.market.models.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,12 +26,12 @@ public class Order extends BaseEntity {
     private OrderStatus status;
 
     @Column(nullable = false)
-    private String paymentMethod; // e.g., "MPESA", "CASH_ON_DELIVERY"
+    private String paymentMethod;
 
     @Column(columnDefinition = "TEXT")
-    private String shippingAddress; // Snapshot of the delivery destination text
+    private String shippingAddress;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Optimized lazy loading for order owner lookups
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

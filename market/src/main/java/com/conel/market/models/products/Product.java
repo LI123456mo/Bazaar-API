@@ -1,7 +1,7 @@
 package com.conel.market.models.products;
 
 import com.conel.market.models.BaseEntity;
-import com.conel.market.models.OrderItem;
+import com.conel.market.models.order.OrderItem;
 import com.conel.market.models.category.Category;
 import com.conel.market.models.user.User;
 import jakarta.persistence.*;

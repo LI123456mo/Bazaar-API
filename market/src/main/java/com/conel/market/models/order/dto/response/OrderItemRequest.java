@@ -1,4 +1,4 @@
-package com.conel.market.models.order.dto;
+package com.conel.market.models.order.dto.response;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

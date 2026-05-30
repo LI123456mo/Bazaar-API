@@ -2,7 +2,6 @@ package com.conel.market.models.order;
 
 import com.conel.market.dto.OrderItemResponseDto;
 import com.conel.market.models.order.dto.OrderResponseDto;
-import com.conel.market.models.OrderItem;
 import org.springframework.stereotype.Service;
 
 @Service

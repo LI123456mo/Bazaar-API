@@ -1,4 +1,4 @@
-package com.conel.market.models;
+package com.conel.market.models.order;
 
 public enum OrderStatus {
     PENDING,
