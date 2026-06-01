@@ -35,6 +35,10 @@ public class Product extends BaseEntity {
 
     private String imageUrl;
 
+    private ProductType productType;
+
+    private String downloadUrl;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id", nullable = false)
     @ToString.Exclude
