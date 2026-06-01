@@ -1,7 +1,6 @@
-package com.conel.market.controllers;
+package com.conel.market.models.products;
 
 import com.conel.market.file.FileStorageService;
-import com.conel.market.models.products.ProductService;
 import com.conel.market.models.products.dto.ProductRequest;
 import com.conel.market.models.products.dto.ProductResponse;
 import jakarta.validation.Valid;

@@ -72,7 +72,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Transactional
-    public void RestoreCategory(String id){
+    public void restoreCategory(String id){
         categoryRepository.restoreById(id);
     }
 

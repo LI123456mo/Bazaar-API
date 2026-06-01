@@ -21,7 +21,7 @@ public class OrderItem extends BaseEntity {
 
     private Double priceAtPurchase;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "order_id")
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
