@@ -4,7 +4,9 @@ import com.conel.market.models.category.Category;
 import com.conel.market.models.category.CategoryRepository;
 import com.conel.market.models.products.dto.ProductRequest;
 import com.conel.market.models.products.dto.ProductResponse;
+import com.conel.market.models.user.User;
 import com.conel.market.specifications.ProductSpecification;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,14 +30,15 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
     private final CategoryRepository categoryRepository;
+    private final EntityManager entityManager;
 
     @Transactional
     public ProductResponse saveProduct(ProductRequest dto, String fileName, String userId) {
         var product = productMapper.toProduct(dto);
         product.setImageUrl(fileName);
 
-        // Track who owns this listing behind the scenes
-        // product.setSellerId(userId); // Uncomment once your User/Seller field mapping is ready!
+        User seller=entityManager.getReference(User.class,userId);
+        product.setSeller(seller);
 
         if (dto.categoryId() != null) {
             Category category = categoryRepository.findById(dto.categoryId())
@@ -69,10 +72,12 @@ public class ProductService {
         existingProduct.setPrice(dto.price());
         existingProduct.setStockQuantity(dto.stockQuantity());
 
-        if (dto.categoryId() != null && !dto.categoryId().equals(existingProduct.getCategory().getId())) {
-            Category newCategory = categoryRepository.findById(dto.categoryId())
-                    .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + dto.categoryId()));
-            existingProduct.setCategory(newCategory);
+        if (dto.categoryId() != null) {
+            if (existingProduct.getCategory() == null || !dto.categoryId().equals(existingProduct.getCategory().getId())) {
+                Category newCategory = categoryRepository.findById(dto.categoryId())
+                        .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + dto.categoryId()));
+                existingProduct.setCategory(newCategory);
+            }
         }
 
         Product savedProduct = productRepository.save(existingProduct);

@@ -17,6 +17,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/products") // REST best practice: open catalog endpoint prefix
 @RequiredArgsConstructor
@@ -57,14 +59,18 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    // Public access allows standard customers to view specific product item details pages
     public ResponseEntity<ProductResponse> findById(@PathVariable("id") String id) {
         ProductResponse response = productService.findById(id);
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{name}")
+    public ResponseEntity<List<ProductResponse>> searchByName(@PathVariable("name") String name) {
+        List<ProductResponse> responses = productService.searchByName(name);
+        return ResponseEntity.ok(responses);
+    }
+
     @GetMapping
-    // Public entrypoint mapping for search grids and dynamic home lists
     public ResponseEntity<Page<ProductResponse>> findAll(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Double maxPrice,
