@@ -3,6 +3,7 @@ package com.conel.market.models.user;
 import com.conel.market.models.Address;
 import com.conel.market.models.order.Order;
 import com.conel.market.models.Role;
+import com.conel.market.models.products.Product;
 import jakarta.persistence.*;
 import lombok.*;
 import org.jspecify.annotations.Nullable;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static jakarta.persistence.GenerationType.UUID;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -25,7 +28,7 @@ import java.util.List;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = UUID)
     private String id;
 
     private String firstName;
@@ -67,15 +70,18 @@ public class User implements UserDetails {
     )
     private List<Role> roles=new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<Order> orderList=new ArrayList<>();
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<Address> addresses;
+
+    @OneToMany(mappedBy = "seller",cascade = CascadeType.ALL)
+    private List<Product> products=new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
