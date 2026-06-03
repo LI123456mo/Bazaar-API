@@ -28,9 +28,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-    private UserRepository userRepository;
-    private RoleRepository roleRepository;
-    private UserMapper userMapper;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final UserMapper userMapper;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
@@ -59,18 +59,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     public void register(RegistrationRequest request) {
         checkUserEmail(request.getEmail());
-        checkPassword(request.getPassword(),request.getConfirmPassword());
         checkUserPhoneNumber(request.getPhoneNumber());
+        checkPassword(request.getPassword(),request.getConfirmPassword());
 
         final Role userRole=this.roleRepository.findByName("ROLE_USER")
-                .orElseThrow(()->new EntityNotFoundException("Role User does not exist"));
+                .orElseThrow(()-> new EntityNotFoundException("Role User does not exist"));
 
         final List<Role> roles=new ArrayList<>();
         roles.add(userRole);
 
         final User user=this.userMapper.toUser(request);
         user.setRoles(roles);
-        log.debug("saving user {}",user);
+        log.debug("Saving user {}",user);
         this.userRepository.save(user);
 
         final List<User> users=new ArrayList<>();
