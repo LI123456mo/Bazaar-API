@@ -1,4 +1,4 @@
-package com.conel.market.exceptions;
+package com.conel.market.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
