@@ -1,6 +1,5 @@
-package com.conel.market.repositories;
+package com.conel.market.models.role;
 
-import com.conel.market.models.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -51,7 +51,9 @@ public class Product extends BaseEntity {
     @EqualsAndHashCode.Exclude
     private User seller;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+
+    //Use PERSIST and MERGE. If a product updates, order records are untouched.
+    @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<OrderItem> orderItems;

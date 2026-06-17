@@ -1,5 +1,6 @@
-package com.conel.market.models;
+package com.conel.market.models.role;
 
+import com.conel.market.models.BaseEntity;
 import com.conel.market.models.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @SuperBuilder
 @Table(name = "ROLES")
-public class Role extends BaseEntity{
+public class Role extends BaseEntity {
 
     @Column(name = "NAME",nullable = false)
     private String name;

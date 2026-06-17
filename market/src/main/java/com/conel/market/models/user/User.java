@@ -2,10 +2,11 @@ package com.conel.market.models.user;
 
 import com.conel.market.models.Address;
 import com.conel.market.models.order.Order;
-import com.conel.market.models.Role;
+import com.conel.market.models.role.Role;
 import com.conel.market.models.products.Product;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,6 +25,7 @@ import static jakarta.persistence.GenerationType.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@SQLRestriction("is_deleted=false")
 @Table(name = "_user")
 public class User implements UserDetails {
 
@@ -44,15 +46,40 @@ public class User implements UserDetails {
 
     private LocalDate dateOfBirth;
 
-    private boolean enabled;
+    @Builder.Default
+    private boolean enabled=true;
 
-    private boolean locked;
+    @Builder.Default
+    private boolean locked=false;
 
-    private boolean credentialsExpired;
+    @Builder.Default
+    private boolean credentialsExpired=false;
 
-    private boolean emailVerified;
+    @Builder.Default
+    private boolean emailVerified=false;
 
-    private boolean phoneVerified;
+    @Builder.Default
+    private boolean phoneVerified=false;
+
+    @Builder.Default
+    @Column(name = "is_deleted",nullable = false)
+    private boolean deleted=false;
+
+    public void softDelete() {
+        String timestamp = String.valueOf(System.currentTimeMillis());
+
+        this.deleted = true;
+        this.enabled = false;
+        this.locked = true;
+
+        this.firstName = "Deleted";
+        this.lastName = "User";
+        this.email = "deleted_" + this.id + "_" + timestamp + "@deleted.local";
+
+        if (this.phoneNumber != null) {
+            this.phoneNumber = "deleted_" + this.id + "_" + timestamp;
+        }
+    }
 
 
     @ManyToMany(
@@ -70,18 +97,20 @@ public class User implements UserDetails {
     )
     private List<Role> roles=new ArrayList<>();
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    // Financial records (Orders) must NEVER be cascade-deleted
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<Order> orderList=new ArrayList<>();
+    private List<Order> orderList = new ArrayList<>();
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<Address> addresses;
 
-    @OneToMany(mappedBy = "seller",cascade = CascadeType.ALL)
-    private List<Product> products=new ArrayList<>();
+    // Products shouldn't be deleted instantly; they should be unlisted via a flag in Product entity
+    @OneToMany(mappedBy = "seller", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<Product> products = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

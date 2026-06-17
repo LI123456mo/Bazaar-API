@@ -1,5 +1,7 @@
 package com.conel.market.models.order;
 
+import com.conel.market.exception.BusinessException;
+import com.conel.market.exception.ErrorCode;
 import com.conel.market.models.order.dto.request.OrderRequest;
 import com.conel.market.models.order.dto.response.OrderItemRequest;
 import com.conel.market.models.order.dto.response.OrderItemResponse;
@@ -7,6 +9,7 @@ import com.conel.market.models.order.dto.response.OrderResponse;
 import com.conel.market.models.products.Product;
 import com.conel.market.models.products.ProductService;
 import com.conel.market.models.user.User;
+import com.conel.market.models.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,14 +24,20 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductService productService;
+    private final UserRepository userRepository;
 
     @Transactional
     public OrderResponse placeOrder(OrderRequest request) {
+        User buyer = userRepository.findById(request.userId())
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         Order order = Order.builder()
                 .status(OrderStatus.PENDING)
                 .paymentMethod(request.paymentMethod())
                 .shippingAddress(request.shippingAddress())
-                .user(User.builder().id(request.userId()).build())
+                .user(buyer)
+                .buyerEmailSnapshot(buyer.getEmail())
+                .buyerNameSnapshot(buyer.getFirstName()+" "+buyer.getLastName())
                 .orderItems(new ArrayList<>())
                 .totalAmount(0.0)
                 .build();

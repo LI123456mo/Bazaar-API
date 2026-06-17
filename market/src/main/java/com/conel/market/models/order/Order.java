@@ -31,6 +31,12 @@ public class Order extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String shippingAddress;
 
+    @Column(nullable = false)
+    private String buyerEmailSnapshot;
+
+    @Column(nullable = false)
+    private String buyerNameSnapshot;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @ToString.Exclude
