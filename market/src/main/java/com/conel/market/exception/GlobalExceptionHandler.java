@@ -7,39 +7,55 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.View;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private final View error;
+    //Handles manual business checks (e.g., EMAIL_ALREADY_EXISTS)
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<Map<String, Object>> handleBusinessException(BusinessException ex) {
+        ErrorCode errorCode = ex.getErrorCode();
 
-    public GlobalExceptionHandler(View error) {
-        this.error = error;
+        Map<String, Object> body = new HashMap<>();
+        body.put("code", errorCode.getCode());
+        body.put("message", ex.getMessage());
+        body.put("timestamp", LocalDateTime.now());
+
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(body);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    // Catch manual logic errors (like "Email already exists")
-    public ResponseEntity<String> handleRuntime(RuntimeException ex){
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-    }
-
-    //CATCHES VALIDATION ERRORS
+    // Handles JSR-303 annotations  DTOs (e.g., @NotBlank, @Email)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String,String>> handleValidationExceptions(MethodArgumentNotValidException ex){
-        Map<String,String> errors=new HashMap<>();
+    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        Map<String, String> fieldErrors = new HashMap<>();
 
-        //FIELD ERRORS LIKE (@Email,@NotBlank)
-        ex.getBindingResult().getFieldErrors().forEach(error->
-                errors.put(error.getField(),error.getDefaultMessage())
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                fieldErrors.put(error.getField(), error.getDefaultMessage())
         );
 
+        Map<String, Object> body = new HashMap<>();
+        body.put("code", "VALIDATION_FAILED");
+        body.put("message", "Input validation errors occurred");
+        body.put("errors", fieldErrors);
+        body.put("timestamp", LocalDateTime.now());
 
-        //GLOBAL ERRORS(eg @PasswordMatch)
-        ex.getBindingResult().getGlobalErrors().forEach(error->
-                errors.put("global",error.getDefaultMessage())
-        );
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    //Safety net fallback for unexpected crashes (e.g., NullPointerException)
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleGeneralException(Exception ex) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("code", ErrorCode.INTERNAL_EXCEPTION.getCode());
+        body.put("message", ErrorCode.INTERNAL_EXCEPTION.getDefaultMessage());
+        body.put("timestamp", LocalDateTime.now());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
 }

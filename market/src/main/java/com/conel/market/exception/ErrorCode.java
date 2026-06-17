@@ -12,8 +12,10 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 @Getter
 public enum ErrorCode {
     EMAIL_ALREADY_EXISTS("ERR_EMAIL_EXISTS", "Email already exists", CONFLICT),
+    EMAIL_CANNOT_BE_EMPTY("ERR_EMAIL_NEEDED","Email cannot be empty",CONFLICT),
     PHONE_ALREADY_EXISTS("ERR_PHONE_EXISTS", "An account with this phone number already exists", CONFLICT),
     PASSWORD_MISMATCH("ERR_PASSWORD_MISMATCH", "The password and confirmation do not match", BAD_REQUEST),
+    PASSWORD_REQUIRED("ERR_PASSWORD_NEEDED","Password cannot be empty",CONFLICT),
     CHANGE_PASSWORD_MISMATCH("ERR_PASSWORD_MISMATCH", "New password and confirmation do not match", BAD_REQUEST),
     ERR_SENDING_ACTIVATION_EMAIL("ERR_SENDING_ACTIVATION_EMAIL",
             "An error occurred while sending the activation email",
