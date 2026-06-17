@@ -11,10 +11,10 @@ import com.conel.market.models.category.dto.response.CategoryResponse;
 import com.conel.market.models.products.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -25,19 +25,22 @@ public class CategoryServiceImpl implements CategoryService {
     private final ProductRepository productRepository;
 
     @Override
-    public String createCategory(final CategoryRequest request) {
+    @Transactional
+    public CategoryResponse createCategory(final CategoryRequest request) {
         checkCategoryGlobalUnicity(request.name());
 
         final Category category = this.categoryMapper.toCategory(request);
-        return this.categoryRepository.save(category).getId();
+        final Category savedCategory = this.categoryRepository.save(category);
+
+        return this.categoryMapper.toCategoryResponseDto(savedCategory);
     }
 
     @Override
+    @Transactional
     public void updateCategory(CategoryUpdateRequest request, String catId) {
         final Category categoryToUpdate = this.categoryRepository.findById(catId)
                 .orElseThrow(() -> new EntityNotFoundException("No category found with id: " + catId));
 
-        // Only run a unicity check if they are actually changing the category's name
         if (!categoryToUpdate.getName().equalsIgnoreCase(request.name())) {
             checkCategoryGlobalUnicity(request.name());
         }
@@ -47,15 +50,14 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryResponse> findAllCategories() {
-        return this.categoryRepository.findAll()
-                .stream()
-                .map(this.categoryMapper::toCategoryResponseDto)
-                .toList();
+    @Transactional(readOnly = true)
+    public Page<CategoryResponse> findAllCategories(Pageable pageable) {
+        return this.categoryRepository.findAll(pageable)
+                .map(this.categoryMapper::toCategoryResponseDto);
     }
 
-
     @Override
+    @Transactional(readOnly = true)
     public CategoryResponse findCategoryById(String catId) {
         return this.categoryRepository.findById(catId)
                 .map(this.categoryMapper::toCategoryResponseDto)
@@ -63,16 +65,22 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public void deleteCategoryById(String catId) {
-        Category category=categoryRepository.findById(catId)
-                .orElseThrow(()->new EntityNotFoundException("category not found"));
+        Category category = categoryRepository.findById(catId)
+                .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + catId));
+
         category.setActive(false);
         productRepository.archiveAllByCategoryId(catId);
         categoryRepository.save(category);
     }
 
+    @Override
     @Transactional
-    public void restoreCategory(String id){
+    public void restoreCategory(String id) {
+        Category archivedCategory = categoryRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + id));
+        checkCategoryGlobalUnicity(archivedCategory.getName());
         categoryRepository.restoreById(id);
     }
 
