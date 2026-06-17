@@ -11,8 +11,9 @@ import org.springframework.stereotype.Service;
 public class CategoryMapper {
     //WHAT THE ENTITY NEEDS
     public Category toCategory(CategoryRequest dto){
-        var category=new Category();
+        var category = new Category();
         category.setName(dto.name());
+        category.setDescription(dto.description()); // 👑 FIXED: Maps the description field correctly!
         return category;
     }
 
