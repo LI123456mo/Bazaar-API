@@ -21,7 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/products") // REST best practice: open catalog endpoint prefix
+@RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
 public class ProductController {
 
@@ -81,10 +81,9 @@ public class ProductController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SELLER') or hasRole('ADMIN')")
     public ResponseEntity<Void> delete(
-            @PathVariable("id")String id,
-            @AuthenticationPrincipal User authenticatedUser
+            @PathVariable("id")String id
     ){
-        productService.deleteProduct(id,authenticatedUser);
+        productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 

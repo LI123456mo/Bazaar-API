@@ -34,6 +34,7 @@ public enum ErrorCode {
             HttpStatus.INTERNAL_SERVER_ERROR),
     USERNAME_NOT_FOUND("USERNAME_NOT_FOUND", "Cannot find user with the provided username", NOT_FOUND),
     CATEGORY_ALREADY_EXISTS_FOR_USER("CATEGORY_ALREADY_EXISTS_FOR_USER", "Category already exists for this user", CONFLICT),
+    ACCESS_DENIED("ACCESS_DENIED","You do not have permission to modify this product listing.",NOT_ACCEPTABLE)
     ;
 
     private final String code;

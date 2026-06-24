@@ -1,5 +1,7 @@
 package com.conel.market.models.products;
 
+import com.conel.market.exception.BusinessException;
+import com.conel.market.exception.ErrorCode;
 import com.conel.market.models.category.Category;
 import com.conel.market.models.category.CategoryRepository;
 import com.conel.market.models.products.dto.ProductRequest;
@@ -51,13 +53,17 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponse updateProduct(String id, ProductRequest dto, String newFileName) {
+    public ProductResponse updateProduct(String id, ProductRequest dto, String newFileName, User authenticatedUser) {
         Product existingProduct = getProductEntity(id);
+
+        //  Multi-tenant security check. Prevents foreign seller modifications.
+        validateProductOwnership(existingProduct, authenticatedUser);
 
         if (newFileName != null) {
             String oldFileName = existingProduct.getImageUrl();
             if (oldFileName != null) {
                 try {
+                    // TODO //Consider moving path logic to FileStorageService later for clean separation
                     Path oldFilePath = Paths.get("uploads").resolve(oldFileName);
                     Files.deleteIfExists(oldFilePath);
                 } catch (IOException e) {
@@ -154,5 +160,24 @@ public class ProductService {
         // CHANGED: Soft delete implementation ensures orders remain intact
         product.setActive(false);
         productRepository.save(product);
+    }
+
+    /**
+     *  Helper method to enforce tenant isolation rules safely.
+     * Allows changes only if the user is the original listing seller OR has administrative rights.
+     */
+    private void validateProductOwnership(Product product, User user) {
+        if (user == null) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
+
+        boolean isAdmin = user.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+
+        boolean isOwner = product.getSeller() != null && product.getSeller().getId().equals(user.getId());
+
+        if (!isOwner && !isAdmin) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
     }
 }
