@@ -20,7 +20,5 @@ public record ProductRequest(
         Integer stockQuantity,
 
         @NotBlank(message = "Product category is required")
-        String categoryId,
-
-        String imageUrl
+        String categoryId
 ) {}

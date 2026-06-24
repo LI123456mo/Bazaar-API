@@ -16,9 +16,9 @@ spring:
       hibernate:
         format_sql: true
 
-logging:
-  level:
-    org.springframework.security: DEBUG
-    org.springframework.security.authentication.dao.DaoAuthenticationProvider: TRACE
-    org.hibernate.SQL: DEBUG
-    org.hibernate.orm.results: TRACE
+#logging:
+#  level:
+#    org.springframework.security: DEBUG
+#    org.springframework.security.authentication.dao.DaoAuthenticationProvider: TRACE
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.orm.results: TRACE

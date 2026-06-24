@@ -64,6 +64,29 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
+
+
+    /**
+     * REST endpoint to search and filter products with dynamic criteria and pagination.
+     * <p>
+     * This endpoint allows open, public access to the product catalog. Clients can optionally
+     * filter results by product name, maximum price, or category name. Results are always
+     * returned in a paginated format to protect server resources.
+     * </p>
+     *
+     * <h3>Example Request:</h3>
+     * <pre>
+     * GET /api/v1/products?category=Electronics&amp;maxPrice=500.00&amp;page=0&amp;size=10&amp;sort=price,desc
+     * </pre>
+     *
+     * @param name      Optional text string to search for in product names (case-insensitive partial match).
+     * @param maxPrice  Optional upper threshold limit for product pricing. Must be greater than 0.
+     * @param category  Optional exact text name of the category the product belongs to.
+     * @param page      The zero-indexed page number to retrieve (defaults to 0).
+     * @param size      The maximum number of products to return inside this page block (defaults to 10).
+     * @param sort      The sorting parameters formatted as "field,direction" (defaults to "id,asc").
+     * @return A {@link ResponseEntity} wrapping a {@link Page} of {@link ProductResponse} objects matching the criteria.
+     */
     @GetMapping
     public ResponseEntity<Page<ProductResponse>> findAll(
             @RequestParam(required = false)String name,

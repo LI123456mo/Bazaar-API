@@ -19,7 +19,6 @@ public class ProductMapper {
         product.setDescription(dto.description());
         product.setPrice(dto.price());
         product.setStockQuantity(dto.stockQuantity());
-        product.setImageUrl(dto.imageUrl());
 
         if (dto.categoryId() != null) {
             var category = new Category();

@@ -136,6 +136,31 @@ public class ProductService {
                 .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
     }
 
+
+
+
+    /**
+     * Builds a dynamic JPA Specification query based on optional client filters and executes a paginated database search.
+     * <p>
+     * Rather than creating multiple static repository queries, this method compiles a single type-safe
+     * SQL execution block on the fly. It enforces a structural baseline condition ensuring that only
+     * <b>active (non-soft-deleted)</b> products are returned to the user.
+     * </p>
+     * * <h3>Advanced Query Performance Tuning:</h3>
+     * To accommodate Spring Data's pagination mechanics without destroying database performance:
+     * <ul>
+     * <li><b>Count Mapping:</b> When executing background total row counts, the query skips aggressive data fetches.</li>
+     * <li><b>Fetch Optimization:</b> When pulling actual rows, it forces an <code>INNER FETCH JOIN</code> on the
+     * product's Category relationship. This loads both entities into application memory in 1 database round-trip,
+     * completely solving the <i>N+1 Lazy Loading Performance Deficit</i>.</li>
+     * </ul>
+     *
+     * @param name       The optional name search term passed from the controller layer.
+     * @param maxPrice   The optional price cell threshold constraint.
+     * @param category   The optional category text identifier to filter against.
+     * @param pageable   The pre-configured pagination block containing limit, offset, and sort preferences.
+     * @return A paginated data container holding mapped {@link ProductResponse} records.
+     */
     @Transactional(readOnly = true)
     public Page<ProductResponse> searchProducts(String name, Double maxPrice, String category, Pageable pageable) {
         Specification<Product> spec = Specification.where((root, query, cb) -> cb.equal(root.get("active"), true));
