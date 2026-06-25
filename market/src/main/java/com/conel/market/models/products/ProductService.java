@@ -180,8 +180,9 @@ public class ProductService {
     }
 
     @Transactional
-    public void deleteProduct(String id) {
+    public void deleteProduct(String id,User authenticatedUser) {
         Product product = getProductEntity(id);
+        validateProductOwnership(product,authenticatedUser);
         // CHANGED: Soft delete implementation ensures orders remain intact
         product.setActive(false);
         productRepository.save(product);
