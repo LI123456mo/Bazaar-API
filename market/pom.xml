@@ -53,7 +53,7 @@
 
 	<dependencies>
 
-		<!-- ===== EXISTING DEPENDENCIES ===== -->
+		<!-- ===== EXISTING DEPENDENCIES (your original project) ===== -->
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -83,7 +83,8 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<version>1.18.30</version><optional>true</optional>
+			<version>1.18.30</version>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
@@ -121,19 +122,31 @@
 			<version>2.5.0</version>
 		</dependency>
 
-		<!-- ===== NEW: RAG DEPENDENCIES ===== -->
+		<!-- ===== RAG DEPENDENCIES ===== -->
 
-		<!-- Connects Spring Boot to Ollama (llama3 = answers, nomic = embeddings) -->
+		<!-- Connects to Ollama — used ONLY for embeddings now (nomic-embed-text)
+		     Groq doesn't offer embedding models, so we still need Ollama locally
+		     just to convert your Java files into vectors -->
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-starter-model-ollama</artifactId>
 			<version>1.0.0</version>
 		</dependency>
 
-		<!-- Connects Spring Boot to ChromaDB (stores and searches your code vectors) -->
+		<!-- Connects to Groq for CHAT/answers (replaces llama3)
+		     Groq uses the same API format as OpenAI, so we use the
+		     OpenAI starter but point its base-url to Groq's servers -->
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
-			<artifactId>spring-ai-starter-vector-store-chroma</artifactId>
+			<artifactId>spring-ai-starter-model-openai</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
+		<!-- In-memory vector store — stores your code's vectors in RAM
+		     No Docker/ChromaDB needed, replaced earlier due to version conflicts -->
+		<dependency>
+			<groupId>org.springframework.ai</groupId>
+			<artifactId>spring-ai-vector-store</artifactId>
 			<version>1.0.0</version>
 		</dependency>
 
@@ -149,7 +162,8 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-							<version>1.18.30</version> </path>
+							<version>1.18.30</version>
+						</path>
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
