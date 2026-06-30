@@ -2,49 +2,54 @@ package com.conel.market.rag;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class CodeQAService {
 
-    private final ChatClient.Builder chatClientBuilder;
+    private final ChatClient chatClient;
     private final VectorStore vectorStore;
 
-    public String ask(String question) {
-        ChatClient chatClient = chatClientBuilder.build();
+    // @Qualifier tells Spring to use openAiChatModel (which is actually Groq)
+    // instead of ollamaChatModel since we have both on the classpath now
+    public CodeQAService(@Qualifier("openAiChatModel") ChatModel chatModel, VectorStore vectorStore) {
+        this.chatClient = ChatClient.builder(chatModel).build();
+        this.vectorStore = vectorStore;
+    }
 
-        // Step 1: Convert question to vector and find top 5 similar code chunks
+    public String ask(String question) {
         List<Document> relevant = vectorStore.similaritySearch(
                 SearchRequest.builder()
-                        .query(question)//Text to use for embedding similarity
+                        .query(question)
                         .topK(5)
                         .build()
         );
 
-        // Step 2: Build context string from retrieved code
         String context = relevant.stream()
                 .map(doc -> "// File: " + doc.getMetadata().get("file")
                         + "\n" + doc.getText())
                 .collect(Collectors.joining("\n\n---\n\n"));
 
-        // Step 3: Ask llama3 using the retrieved code as context
         String prompt = """
-            You are an expert code reviewer for a Spring Boot e-commerce API called Bazaar.
-            Use ONLY the following source code to answer the question.
-            Be specific about class names, methods, and line-level details.
-            
-            SOURCE CODE CONTEXT:
-            %s
-            
-            QUESTION: %s
-            """.formatted(context, question);
+                You are a senior Java/Spring Boot code reviewer.
+                Review the following source code and suggest SPECIFIC improvements.
+                Focus on: performance issues, security vulnerabilities,
+                better design patterns, cleaner code, missing validations.
+                Be direct and specific — reference exact class names and methods.
+                
+                SOURCE CODE:
+                %s
+                
+                QUESTION/TASK: %s
+                """.formatted(context, question);
 
         return chatClient.prompt()
                 .user(prompt)
