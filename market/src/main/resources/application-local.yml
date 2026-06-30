@@ -19,27 +19,19 @@ spring:
 
   # =====  SPRING AI CONFIG =====
   ai:
-    ollama:
-      # ollama on PC
-      # (Ollama always runs on port 11434 by default)
-      base-url: http://localhost:11434
-
+    openai:
+      api-key: ${GROG_API}
+      base-url: https://api.groq.com/openai
       chat:
-        # llama3 = the brain that reads  code and answers questions
-        model: llama3
+        options:
+          model: llama-3.1-8b-instant
 
+      # Keep using Ollama JUST for embeddings (nomic-embed-text)
+      # Groq doesn't do embeddings, only chat
+    ollama:
+      base-url: http://localhost:11434
       embedding:
-        # nomic-embed-text = converts  Java files into vectors
         model: nomic-embed-text
-
-    vectorstore:
-      chroma:
-        host: localhost
-        port: 8000
-        # The "folder" inside ChromaDB where  code vectors will be saved
-        collection-name: bazaar-codebase
-        #Tells ChromaDB to auto-create the storage bucket on first run
-        initialize-schema: true
 
 
 #logging:
