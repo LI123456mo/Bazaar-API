@@ -122,7 +122,7 @@ public class OrderService {
         );
     }
 
-    // OrderService.java
+    @Transactional(readOnly = true)
     public Page<OrderResponse> getAllOrders(Pageable pageable) {
         return orderRepository.findAll(pageable)
                 .map(order -> {
