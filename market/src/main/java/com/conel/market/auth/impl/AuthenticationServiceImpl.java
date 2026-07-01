@@ -7,6 +7,7 @@ import com.conel.market.auth.request.RegistrationRequest;
 import com.conel.market.auth.response.AuthenticationResponse;
 import com.conel.market.exception.BusinessException;
 import com.conel.market.exception.ErrorCode;
+import com.conel.market.models.vendor.VendorStatus;
 import com.conel.market.security.JwtService;
 import com.conel.market.models.user.UserMapper;
 import com.conel.market.models.role.Role;
@@ -68,17 +69,36 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         checkPassword(request.getPassword(), request.getConfirmPassword());
 
         final Role userRole = this.roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new EntityNotFoundException("Role User does not exist"));
-
-        final List<Role> roles = new ArrayList<>();
-        roles.add(userRole);
+                .orElseThrow(() -> new EntityNotFoundException("Role ROLE_USER does not exist"));
 
         final User user = this.userMapper.toUser(request);
-        user.setRoles(roles);
+        user.setRoles(List.of(userRole));
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setVendorStatus(null);
 
+        log.debug("Registering customer: {}", user.getEmail());
+        this.userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void registerVendor(RegistrationRequest request) {
+        checkUserEmail(request.getEmail());
+        checkUserPhoneNumber(request.getPhoneNumber());
+        checkPassword(request.getPassword(), request.getConfirmPassword());
+
+        final Role vendorRole = this.roleRepository.findByName("ROLE_VENDOR")
+                .orElseThrow(() -> new EntityNotFoundException("Role ROLE_VENDOR does not exist"));
+
+        final User user = this.userMapper.toUser(request);
+        user.setRoles(List.of(vendorRole));
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        log.debug("Saving user {}", user);
+        user.setVendorStatus(VendorStatus.PENDING_APPROVAL);
+        user.setVendorApproved(false);
+        user.setEnabled(true);
+
+        log.debug("Registering vendor (pending approval): {}", user.getEmail());
         this.userRepository.save(user);
     }
 
