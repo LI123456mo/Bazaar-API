@@ -66,8 +66,7 @@ public class User implements UserDetails {
     private boolean deleted=false;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Builder.Default
+    @Column(nullable = true)
     private VendorStatus vendorStatus=VendorStatus.PENDING_APPROVAL;
 
     @Column(nullable = false)

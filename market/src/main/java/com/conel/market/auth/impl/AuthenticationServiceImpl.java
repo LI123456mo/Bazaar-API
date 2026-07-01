@@ -68,8 +68,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         checkUserPhoneNumber(request.getPhoneNumber());
         checkPassword(request.getPassword(), request.getConfirmPassword());
 
-        final Role userRole = this.roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new EntityNotFoundException("Role ROLE_USER does not exist"));
+        final Role userRole = this.roleRepository.findByName("CUSTOMER")
+                .orElseThrow(() -> new EntityNotFoundException("Role CUSTOMER does not exist"));
 
         final User user = this.userMapper.toUser(request);
         user.setRoles(List.of(userRole));

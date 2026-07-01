@@ -46,4 +46,10 @@ public class AuthenticationController {
             ){
         return ResponseEntity.ok(this.authenticationService.refreshToken(request));
     }
+
+    @PostMapping("/register-vendor")
+    public ResponseEntity<Void> registerVendor(@Valid @RequestBody RegistrationRequest request) {
+        authenticationService.registerVendor(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }
