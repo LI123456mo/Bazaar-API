@@ -83,7 +83,7 @@ public class User implements UserDetails {
 
     @ManyToMany(
             cascade = {CascadeType.PERSIST, CascadeType.MERGE},
-            fetch = FetchType.EAGER
+            fetch = FetchType.LAZY
     )
     @JoinTable(
             name = "USERS_ROLES",
