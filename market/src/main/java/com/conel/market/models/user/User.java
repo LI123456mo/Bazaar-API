@@ -4,6 +4,7 @@ import com.conel.market.models.Address;
 import com.conel.market.models.order.Order;
 import com.conel.market.models.role.Role;
 import com.conel.market.models.products.Product;
+import com.conel.market.security.RoleEnum;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLRestriction;
@@ -14,9 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.CollectionUtils;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import static jakarta.persistence.GenerationType.UUID;
 
@@ -117,9 +116,22 @@ public class User implements UserDetails {
         if (CollectionUtils.isEmpty(this.roles)){
             return List.of();
         }
-        return  this.roles.stream()
-                .map(r->new SimpleGrantedAuthority(r.getName()))
-                .toList();
+        Set<SimpleGrantedAuthority> authorities=new HashSet<>();
+
+        //for backward compatibility
+        this.roles.forEach(role->authorities.add(
+                new SimpleGrantedAuthority("ROLE_"+role.getName().toUpperCase())));
+
+
+        //fine-grained permissions
+        this.roles.forEach(role -> {
+            RoleEnum roleEnum=RoleEnum.valueOf(role.getName().toUpperCase());
+
+            roleEnum.getPermissions().forEach(permission ->
+                    authorities.add(new SimpleGrantedAuthority(permission.getPermission()))
+            );
+        });
+        return authorities;
     }
 
     @Override
