@@ -125,7 +125,26 @@ public class OrderService {
     // OrderService.java
     public Page<OrderResponse> getAllOrders(Pageable pageable) {
         return orderRepository.findAll(pageable)
-                .map(order -> toOrderResponse(order));
+                .map(order -> {
+                    List<OrderItemResponse> itemResponses=order.getOrderItems().stream()
+                            .map(item->new OrderItemResponse(
+                                    item.getProduct().getId(),
+                                    item.getProduct().getName(),
+                                    item.getPriceAtPurchase(),
+                                    item.getQuantity(),
+                                    item.getPriceAtPurchase()* item.getQuantity()
+                            ))
+                            .toList();
+
+                    return new OrderResponse(
+                            order.getId(),
+                            order.getTotalAmount(),
+                            order.getStatus().name(),
+                            order.getPaymentMethod(),
+                            order.getShippingAddress(),
+                            itemResponses
+                    );
+                });
     }
 
 
