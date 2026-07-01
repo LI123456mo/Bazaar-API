@@ -26,6 +26,7 @@ public enum Permission {
     VENDOR_APPROVE("vendor:approve"),
     VENDOR_SUSPEND("vendor:suspend"),
     VENDOR_MANAGE("vendor:manage"),
+    VENDOR_READ("vendor:read"),
 
     // Category management
     CATEGORY_CREATE("category:create"),

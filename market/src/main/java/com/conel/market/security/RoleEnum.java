@@ -33,6 +33,7 @@ public enum RoleEnum {
         add(VENDOR_APPROVE);
         add(VENDOR_SUSPEND);
         add(ADMIN_ACCESS);
+        add(VENDOR_READ);
     }}),
     SUPER_ADMIN(new HashSet<>(){{
         for(Permission p:Permission.values()){

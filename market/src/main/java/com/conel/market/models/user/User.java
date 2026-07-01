@@ -4,6 +4,7 @@ import com.conel.market.models.Address;
 import com.conel.market.models.order.Order;
 import com.conel.market.models.role.Role;
 import com.conel.market.models.products.Product;
+import com.conel.market.models.vendor.VendorStatus;
 import com.conel.market.security.RoleEnum;
 import jakarta.persistence.*;
 import lombok.*;
@@ -63,6 +64,15 @@ public class User implements UserDetails {
     @Builder.Default
     @Column(name = "is_deleted",nullable = false)
     private boolean deleted=false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private VendorStatus vendorStatus=VendorStatus.PENDING_APPROVAL;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean vendorApproved=false;
 
     public void softDelete() {
         String timestamp = String.valueOf(System.currentTimeMillis());

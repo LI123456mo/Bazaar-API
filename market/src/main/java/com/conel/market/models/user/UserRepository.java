@@ -1,5 +1,8 @@
 package com.conel.market.models.user;
 
+import com.conel.market.models.vendor.VendorStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +22,17 @@ public interface UserRepository extends JpaRepository<User,String> {
     //ADMINISTRATIVE OVERRIDE: Bypasses @SQLRestriction to find deleted profiles
     @Query(value = "SELECT * FROM _user u WHERE LOWER(u.email) = LOWER(:email)", nativeQuery = true)
     Optional<User> findAnyUserByEmailIncludeDeleted(@Param("email") String email);
+
+    @EntityGraph(attributePaths = "roles")
+    @Query("""
+            SELECT u FROM User u
+            JOIN u.roles r
+            WHERE r.name = 'VENDOR'
+            AND (:status IS NULL OR u.vendorStatus = :status)
+            ORDER BY u.vendorStatus ASC
+            """)
+    Page<User> findAllVendors(
+            @Param("status") VendorStatus status,
+            Pageable pageable
+    );
 }
