@@ -37,7 +37,7 @@ public class OrderController {
             @PathVariable("id") String id,
             @AuthenticationPrincipal User authenticatedUser
     ) {
-        OrderResponse response = orderService.getOrderById(id,authenticatedUser);
+        OrderResponse response = orderService.getOrderById(id,authenticatedUser.getId());
         return ResponseEntity.ok(response);
     }
 
@@ -46,6 +46,6 @@ public class OrderController {
     public ResponseEntity<Page<OrderResponse>> getAllOrders(
             @PageableDefault(size = 20,sort = "createdAt",direction = Sort.Direction.DESC)Pageable pageable
             ){
-        return ResponseEntity.ok(orderService.getAllOrders(PageAble));
+        return ResponseEntity.ok(orderService.getAllOrders(pageable));
     }
 }

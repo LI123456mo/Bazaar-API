@@ -8,10 +8,13 @@ import com.conel.market.models.order.dto.response.OrderItemResponse;
 import com.conel.market.models.order.dto.response.OrderResponse;
 import com.conel.market.models.products.Product;
 import com.conel.market.models.products.ProductService;
+import com.conel.market.models.products.dto.ProductResponse;
 import com.conel.market.models.user.User;
 import com.conel.market.models.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,8 +30,8 @@ public class OrderService {
     private final UserRepository userRepository;
 
     @Transactional
-    public OrderResponse placeOrder(OrderRequest request) {
-        User buyer = userRepository.findById(request.userId())
+    public OrderResponse placeOrder(OrderRequest request,String authenticatedUserId) {
+        User buyer = userRepository.findById(authenticatedUserId)
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Order order = Order.builder()
@@ -93,9 +96,11 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public OrderResponse getOrderById(String orderId) {
+    public OrderResponse getOrderById(String orderId,String authenticatedUserId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found with ID: " + orderId));
+
+        validateOwnership(order,authenticatedUserId);
 
         List<OrderItemResponse> itemResponses = order.getOrderItems().stream()
                 .map(item -> new OrderItemResponse(
@@ -115,5 +120,18 @@ public class OrderService {
                 order.getShippingAddress(),
                 itemResponses
         );
+    }
+
+    // OrderService.java
+    public Page<OrderResponse> getAllOrders(Pageable pageable) {
+        return orderRepository.findAll(pageable)
+                .map(order -> toOrderResponse(order));
+    }
+
+
+    public void validateOwnership(Order order,String authenticatedUserId){
+        if (!order.getUser().getId().equals(authenticatedUserId)) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
     }
 }
