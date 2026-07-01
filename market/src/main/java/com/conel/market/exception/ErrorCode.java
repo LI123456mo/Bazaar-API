@@ -42,11 +42,11 @@ public enum ErrorCode {
 
     private final String defaultMessage;
 
-    private final HttpStatus status;
+    private final HttpStatus httpStatus;
 
     ErrorCode(String code, String defaultMessage, HttpStatus status) {
         this.code = code;
         this.defaultMessage = defaultMessage;
-        this.status = status;
+        this.httpStatus = status;
     }
 }

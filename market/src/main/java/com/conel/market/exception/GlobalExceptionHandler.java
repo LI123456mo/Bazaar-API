@@ -1,83 +1,80 @@
 package com.conel.market.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.LockedException;
+import org.springframework.web.context.request.WebRequest;
 
-
-import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    //Handles manual business checks (e.g., EMAIL_ALREADY_EXISTS)
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<Map<String, Object>> handleBusinessException(BusinessException ex) {
+    public ResponseEntity<ApiErrorResponse> handleBusinessException(
+            BusinessException ex,
+            WebRequest request) {
+
         ErrorCode errorCode = ex.getErrorCode();
+        ApiErrorResponse response = ApiErrorResponse.builder()
+                .status(errorCode.getHttpStatus().value())
+                .error(errorCode.name())
+                .message(ex.getMessage())
+                .path(request.getDescription(false).replace("uri=", ""))
+                .timestamp(java.time.LocalDateTime.now())
+                .build();
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("code", errorCode.getCode());
-        body.put("message", ex.getMessage());
-        body.put("timestamp", LocalDateTime.now());
-
-        return ResponseEntity
-                .status(errorCode.getStatus())
-                .body(body);
+        log.warn("Business error: {}", ex.getMessage());
+        return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
 
-    // Handles JSR-303 annotations  DTOs (e.g., @NotBlank, @Email)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> fieldErrors = new HashMap<>();
+    public ResponseEntity<ApiErrorResponse> handleValidationException(
+            MethodArgumentNotValidException ex,
+            WebRequest request) {
 
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                fieldErrors.put(error.getField(), error.getDefaultMessage())
-        );
+        Map<String, List<String>> fieldErrors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            fieldErrors.computeIfAbsent(fieldName, k -> new java.util.ArrayList<>())
+                    .add(errorMessage);
+        });
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("code", "VALIDATION_FAILED");
-        body.put("message", "Input validation errors occurred");
-        body.put("errors", fieldErrors);
-        body.put("timestamp", LocalDateTime.now());
+        ApiErrorResponse response = ApiErrorResponse.builder()
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("VALIDATION_ERROR")
+                .message("Input validation failed")
+                .path(request.getDescription(false).replace("uri=", ""))
+                .timestamp(java.time.LocalDateTime.now())
+                .fieldErrors(fieldErrors)
+                .build();
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    //Safety net fallback for unexpected crashes (e.g., NullPointerException)
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneralException(Exception ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("code", ErrorCode.INTERNAL_EXCEPTION.getCode());
-        body.put("message", ErrorCode.INTERNAL_EXCEPTION.getDefaultMessage());
-        body.put("timestamp", LocalDateTime.now());
+    public ResponseEntity<ApiErrorResponse> handleGenericException(
+            Exception ex,
+            WebRequest request) {
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
-    }
+        log.error("Unhandled exception", ex);
+        ApiErrorResponse response = ApiErrorResponse.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .error("INTERNAL_SERVER_ERROR")
+                .message("An unexpected error occurred")
+                .path(request.getDescription(false).replace("uri=", ""))
+                .timestamp(java.time.LocalDateTime.now())
+                .build();
 
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("code", ErrorCode.BAD_CREDENTIALS.getCode());
-        body.put("message", ErrorCode.BAD_CREDENTIALS.getDefaultMessage());
-        body.put("timestamp", LocalDateTime.now());
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
-    }
-
-    @ExceptionHandler({DisabledException.class, LockedException.class})
-    public ResponseEntity<Map<String, Object>> handleAccountLockout(Exception ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("code", ErrorCode.ERR_USER_DISABLED.getCode());
-        body.put("message", ErrorCode.ERR_USER_DISABLED.getDefaultMessage());
-        body.put("timestamp", LocalDateTime.now());
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
