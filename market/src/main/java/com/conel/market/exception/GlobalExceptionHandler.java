@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import java.nio.file.AccessDeniedException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,5 +77,20 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(
+            AccessDeniedException ex,
+            WebRequest request) {
+
+        ApiErrorResponse response = ApiErrorResponse.of(
+                403,
+                "ACCESS_DENIED",
+                "You don't have permission to perform this action",
+                request.getDescription(false).replace("uri=", "")
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 }
