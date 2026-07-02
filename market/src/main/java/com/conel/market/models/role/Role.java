@@ -26,6 +26,4 @@ public class Role extends BaseEntity {
 
     @ManyToMany(mappedBy = "roles")
     List<User> users=new ArrayList<>();
-
-    //todo 2 roles
 }

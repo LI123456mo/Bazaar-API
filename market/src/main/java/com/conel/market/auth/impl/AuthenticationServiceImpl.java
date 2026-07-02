@@ -137,7 +137,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
     private void checkUserPhoneNumber(String phoneNumber) {
         if (phoneNumber == null || phoneNumber.isBlank()) {
-            return; // Skip if phone number is optional  registration setup
+            return;
         }
         final boolean phoneNumberExists=this.userRepository.existsByPhoneNumber(phoneNumber);
 
