@@ -3,16 +3,16 @@ package com.conel.market.models.order;
 import com.conel.market.exception.BusinessException;
 import com.conel.market.exception.ErrorCode;
 import com.conel.market.models.order.dto.request.OrderRequest;
-import com.conel.market.models.order.dto.response.OrderItemRequest;
+import com.conel.market.models.order.dto.request.OrderItemRequest;
 import com.conel.market.models.order.dto.response.OrderItemResponse;
 import com.conel.market.models.order.dto.response.OrderResponse;
 import com.conel.market.models.products.Product;
 import com.conel.market.models.products.ProductService;
-import com.conel.market.models.products.dto.ProductResponse;
 import com.conel.market.models.user.User;
 import com.conel.market.models.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,6 +23,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -33,6 +34,22 @@ public class OrderService {
     public OrderResponse placeOrder(OrderRequest request,String authenticatedUserId) {
         User buyer = userRepository.findById(authenticatedUserId)
                 .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        List<Product> products=new ArrayList<>();
+
+        for(OrderItemRequest itemDto:request.items()){
+            Product product=productService.getProductEntity(itemDto.productId());
+
+            if (!product.isActive()) {
+                throw new BusinessException(ErrorCode.PRODUCT_ARCHIVED);
+            }
+
+            if (product.getStockQuantity() < itemDto.quantity()) {
+                throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
+            }
+
+            products.add(product);
+        }
 
         Order order = Order.builder()
                 .status(OrderStatus.PENDING)
@@ -48,24 +65,29 @@ public class OrderService {
         double runningTotalAmount = 0.0;
         List<OrderItemResponse> responseItemsList = new ArrayList<>();
 
+        int index=0;
         for (OrderItemRequest itemDto : request.items()) {
-            Product product = productService.getProductEntity(itemDto.productId());
+            Product product = products.get(index++);
 
-            if (!product.isActive()) {
-                throw new IllegalArgumentException("Cannot purchase archived product: " + product.getName());
-            }
+           Product lockeProduct=productService.getProductEntityWithLock(product.getId());
 
-            productService.decreaseStock(product.getId(), itemDto.quantity());
+           if (lockeProduct.getStockQuantity()<itemDto.quantity()){
+               throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
+           }
 
-            double itemPriceAtPurchase = product.getPrice();
+           lockeProduct.setStockQuantity(lockeProduct.getStockQuantity()- itemDto.quantity());
+           productService.saveProduct(lockeProduct);
+
+
+            double itemPriceAtPurchase = lockeProduct.getPrice();
             double itemSubTotal = itemPriceAtPurchase * itemDto.quantity();
             runningTotalAmount += itemSubTotal;
 
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
-                    .product(product)
+                    .product(lockeProduct)
                     .quantity(itemDto.quantity())
-                    .priceAtPurchase(itemPriceAtPurchase) // Lock in historical price
+                    .priceAtPurchase(itemPriceAtPurchase)
                     .build();
 
             order.getOrderItems().add(orderItem);
@@ -80,10 +102,9 @@ public class OrderService {
         }
 
         order.setTotalAmount(runningTotalAmount);
-
-
         Order savedOrder = orderRepository.save(order);
 
+        log.info("Order created: {} for user: {}", savedOrder.getId(), buyer.getEmail());
 
         return new OrderResponse(
                 savedOrder.getId(),

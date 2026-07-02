@@ -240,6 +240,17 @@ public class ProductService {
         productRepository.save(product);
     }
 
+    @Transactional
+    public Product getProductEntityWithLock(String id) {
+        return productRepository.findByIdWithPessimisticLock(id)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+    }
+
+    @Transactional
+    public void saveProduct(Product product) {
+        productRepository.save(product);
+    }
+
     /**
      *  Helper method to enforce tenant isolation rules safely.
      * Allows changes only if the user is the original listing seller OR has administrative rights.

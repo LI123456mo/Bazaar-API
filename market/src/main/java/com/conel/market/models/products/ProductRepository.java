@@ -1,6 +1,7 @@
 
 package com.conel.market.models.products;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.*;
@@ -19,6 +20,10 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
 
     @EntityGraph(attributePaths = {"category", "seller"})
     Page<Product> findBySellerId(String sellerId, Pageable pageable);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT p FROM Product p WHERE p.id = :id")
+    Optional<Product> findByIdWithPessimisticLock(@Param("id") String id);
 
     @Modifying
     @Query("UPDATE Product p SET p.active = false WHERE p.category.id = :categoryId")

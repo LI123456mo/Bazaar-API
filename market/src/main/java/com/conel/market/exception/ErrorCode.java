@@ -39,6 +39,8 @@ public enum ErrorCode {
     VERIFICATION_TOKEN_ALREADY_USED("VERIFICATION_TOKEN_ALREADY_USED","your verification token has already been used",BAD_REQUEST),
     VERIFICATION_TOKEN_EXPIRED("VERIFICATION_TOKEN_EXPIRED","your verification code has expired",BAD_REQUEST),
     INVALID_VERIFICATION_TOKEN("INVALID_VERIFICATION_TOKEN", "Verification token is invalid or does not exist", BAD_REQUEST),
+    PRODUCT_ARCHIVED("ERR_PRODUCT_ARCHIVED", "This product is no longer available", NOT_FOUND),
+    INSUFFICIENT_STOCK("ERR_INSUFFICIENT_STOCK", "Not enough stock available for this product", BAD_REQUEST),
     ;
 
     private final String code;
