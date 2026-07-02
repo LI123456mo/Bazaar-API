@@ -5,15 +5,13 @@ import com.conel.market.auth.request.AuthenticationRequest;
 import com.conel.market.auth.request.RefreshRequest;
 import com.conel.market.auth.request.RegistrationRequest;
 import com.conel.market.auth.response.AuthenticationResponse;
+import com.conel.market.models.user.UserVerificationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/v1/auth")
@@ -21,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Authentication", description = "Authentication API")
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
+    private  final UserVerificationService userVerificationService;
 
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> login(
@@ -51,5 +50,12 @@ public class AuthenticationController {
     public ResponseEntity<Void> registerVendor(@Valid @RequestBody RegistrationRequest request) {
         authenticationService.registerVendor(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<Void> verifyEmail(@RequestParam String token) {
+        userVerificationService.verifyEmail(token);
+        return ResponseEntity.ok().build();
     }
 }

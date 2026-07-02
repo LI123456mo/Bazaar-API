@@ -35,7 +35,10 @@ public enum ErrorCode {
     USERNAME_NOT_FOUND("USERNAME_NOT_FOUND", "Cannot find user with the provided username", NOT_FOUND),
     CATEGORY_ALREADY_EXISTS_FOR_USER("CATEGORY_ALREADY_EXISTS_FOR_USER", "Category already exists for this user", CONFLICT),
     ACCESS_DENIED("ACCESS_DENIED","You do not have permission to modify this product listing.",NOT_ACCEPTABLE),
-    INVALID_VENDOR_STATUS("INVALID_VENDOR_STATUS","Vendor is not in the required status for this operation",NOT_ACCEPTABLE)
+    INVALID_VENDOR_STATUS("INVALID_VENDOR_STATUS","Vendor is not in the required status for this operation",NOT_ACCEPTABLE),
+    VERIFICATION_TOKEN_ALREADY_USED("VERIFICATION_TOKEN_ALREADY_USED","your verification token has already been used",BAD_REQUEST),
+    VERIFICATION_TOKEN_EXPIRED("VERIFICATION_TOKEN_EXPIRED","your verification code has expired",BAD_REQUEST),
+    INVALID_VERIFICATION_TOKEN("INVALID_VERIFICATION_TOKEN", "Verification token is invalid or does not exist", BAD_REQUEST),
     ;
 
     private final String code;
