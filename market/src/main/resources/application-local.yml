@@ -33,9 +33,6 @@ spring:
       embedding:
         model: nomic-embed-text
 
-app:
-  email:
-    verification-token-expiry: 24
 #logging:
 #  level:
 #    org.springframework.security: DEBUG
