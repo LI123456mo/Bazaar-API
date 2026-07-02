@@ -7,6 +7,7 @@ import com.conel.market.auth.request.RegistrationRequest;
 import com.conel.market.auth.response.AuthenticationResponse;
 import com.conel.market.exception.BusinessException;
 import com.conel.market.exception.ErrorCode;
+import com.conel.market.models.user.UserVerificationService;
 import com.conel.market.models.vendor.VendorStatus;
 import com.conel.market.security.JwtService;
 import com.conel.market.models.user.UserMapper;
@@ -38,6 +39,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final UserVerificationService userVerificationService;
 
     @Override
     public AuthenticationResponse login(AuthenticationRequest request) {
@@ -75,9 +77,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setRoles(List.of(userRole));
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setVendorStatus(null);
+        user.setEmailVerified(false);
 
         log.debug("Registering customer: {}", user.getEmail());
-        this.userRepository.save(user);
+        User savedUser=this.userRepository.save(user);
+
+        userVerificationService.sendVerificationEmail(savedUser);
+        log.info("Verification email send to: {}",savedUser.getEmail());
     }
 
     @Override
@@ -87,8 +93,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         checkUserPhoneNumber(request.getPhoneNumber());
         checkPassword(request.getPassword(), request.getConfirmPassword());
 
-        final Role vendorRole = this.roleRepository.findByName("ROLE_VENDOR")
-                .orElseThrow(() -> new EntityNotFoundException("Role ROLE_VENDOR does not exist"));
+        final Role vendorRole = this.roleRepository.findByName("VENDOR")
+                .orElseThrow(() -> new EntityNotFoundException("Role VENDOR does not exist"));
 
         final User user = this.userMapper.toUser(request);
         user.setRoles(List.of(vendorRole));
@@ -97,9 +103,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setVendorStatus(VendorStatus.PENDING_APPROVAL);
         user.setVendorApproved(false);
         user.setEnabled(true);
+        user.setEmailVerified(false);
 
         log.debug("Registering vendor (pending approval): {}", user.getEmail());
-        this.userRepository.save(user);
+        User savedVendor=this.userRepository.save(user);
+
+        userVerificationService.sendVerificationEmail(savedVendor);
+
+        log.info("Verification email send to: {}",savedVendor.getEmail());
     }
 
     @Override
