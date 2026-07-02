@@ -72,7 +72,7 @@ public class ProductController {
 
 
     @GetMapping
-    @PreAuthorize("hasAuthority('product:read')")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<Page<ProductResponse>> searchProducts(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Double maxPrice,

@@ -2,7 +2,7 @@ package com.conel.market.models.user;
 
 
 import com.conel.market.auth.request.RegistrationRequest;
-import com.conel.market.models.user.request.ProfileUpdateRequest;
+import com.conel.market.models.user.request.UserProfileUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,18 +28,35 @@ public class UserMapper {
                 .build();
     }
 
-    public void mergeUserInfo(final User user, final ProfileUpdateRequest request) {
-        if (StringUtils.isNotBlank(request.getFirstName()) && !user.getFirstName()
-                                                                   .equals(request.getFirstName())) {
-            user.setFirstName(request.getFirstName());
+    public void mergeUserInfo(final User user, final UserProfileUpdateRequest request) {
+        if (StringUtils.isNotBlank(request.firstName()) && !user.getFirstName()
+                                                                   .equals(request.firstName())) {
+            user.setFirstName(request.firstName());
         }
-        if (StringUtils.isNotBlank(request.getLastName()) && !user.getLastName()
-                                                                  .equals(request.getLastName())) {
-            user.setLastName(request.getLastName());
+        if (StringUtils.isNotBlank(request.lastName()) && !user.getLastName()
+                                                                  .equals(request.lastName())) {
+            user.setLastName(request.lastName());
         }
-        if (request.getDateOfBirth() != null && !request.getDateOfBirth()
+        if (request.dateOfBirth() != null && !request.dateOfBirth()
                                                         .equals(user.getDateOfBirth())) {
-            user.setDateOfBirth(request.getDateOfBirth());
+            user.setDateOfBirth(request.dateOfBirth());
         }
+    }
+
+    public UserResponse toUserResponse(User currentUser) {
+        return new UserResponse(
+                currentUser.getId(),
+                currentUser.getFirstName(),
+                currentUser.getLastName(),
+                currentUser.getEmail(),
+                currentUser.getPhoneNumber(),
+                currentUser.getDateOfBirth(),
+                currentUser.isEmailVerified(),
+                currentUser.isPhoneVerified(),
+                currentUser.isEnabled(),
+                currentUser.getVendorStatus() != null
+                        ? currentUser.getVendorStatus().name()
+                        : null  // ← vendorStatus is String in DTO but VendorStatus enum on User
+        );
     }
 }

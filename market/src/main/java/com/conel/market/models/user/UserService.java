@@ -1,11 +1,10 @@
 package com.conel.market.models.user;
 
 import com.conel.market.models.user.request.ChangePasswordRequest;
-import com.conel.market.models.user.request.ProfileUpdateRequest;
+import com.conel.market.models.user.request.UserProfileUpdateRequest;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface UserService extends UserDetailsService {
-    void updateProfileInfo(ProfileUpdateRequest request, String userId);
 
     void changePassword(ChangePasswordRequest request, String userId);
 
@@ -14,4 +13,8 @@ public interface UserService extends UserDetailsService {
     void reactivateAccount(String userId);
 
     void deleteAccount(String userId);
+
+    UserResponse getUserById(String id);
+
+    UserResponse updateProfileInfo(UserProfileUpdateRequest request, String userId);
 }

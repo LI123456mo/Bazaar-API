@@ -187,6 +187,59 @@ public class ProductService {
         productRepository.save(product);
     }
 
+    @Transactional(readOnly = true)
+    public Page<ProductResponse> getVendorProducts(String vendorId, Pageable pageable) {
+        return productRepository.findBySellerId(vendorId, pageable)
+                .map(productMapper::toProductResponseDto);
+    }
+
+    @Transactional(readOnly = true)
+    public ProductResponse getVendorProduct(String productId, String vendorId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+
+        if (!product.getSeller().getId().equals(vendorId)) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
+
+        return productMapper.toProductResponseDto(product);
+    }
+
+    @Transactional
+    public ProductResponse updateVendorProduct(String productId, ProductRequest dto, String newFileName, User vendor) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+
+        validateProductOwnership(product, vendor);
+
+        if (newFileName != null) {
+            try {
+                Path oldFilePath = Paths.get("uploads").resolve(product.getImageUrl());
+                Files.deleteIfExists(oldFilePath);
+            } catch (IOException e) {
+                log.warn("Could not delete old file: {}", e.getMessage());
+            }
+            product.setImageUrl(newFileName);
+        }
+
+        product.setName(dto.name());
+        product.setDescription(dto.description());
+        product.setPrice(dto.price());
+        product.setStockQuantity(dto.stockQuantity());
+
+        return productMapper.toProductResponseDto(productRepository.save(product));
+    }
+
+    @Transactional
+    public void deleteVendorProduct(String productId, User vendor) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+
+        validateProductOwnership(product, vendor);
+        product.setActive(false);
+        productRepository.save(product);
+    }
+
     /**
      *  Helper method to enforce tenant isolation rules safely.
      * Allows changes only if the user is the original listing seller OR has administrative rights.

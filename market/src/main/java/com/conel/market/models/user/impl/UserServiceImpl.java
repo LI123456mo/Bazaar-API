@@ -2,12 +2,9 @@ package com.conel.market.models.user.impl;
 
 import com.conel.market.exception.BusinessException;
 import com.conel.market.exception.ErrorCode;
-import com.conel.market.models.user.User;
-import com.conel.market.models.user.UserMapper;
-import com.conel.market.models.user.UserRepository;
-import com.conel.market.models.user.UserService;
+import com.conel.market.models.user.*;
 import com.conel.market.models.user.request.ChangePasswordRequest;
-import com.conel.market.models.user.request.ProfileUpdateRequest;
+import com.conel.market.models.user.request.UserProfileUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,14 +31,20 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(()->new UsernameNotFoundException("User not found with username: " + username));
     }
 
+
     @Override
-    public void updateProfileInfo(final ProfileUpdateRequest request, final String userId) {
-        final User savedUser = this.userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(USER_NOT_FOUND));
+    @Transactional(readOnly = true)
+    public UserResponse updateProfileInfo(UserProfileUpdateRequest request, String userId) {
+        User savedUser = userRepository.findById(userId)
+                .orElseThrow(()->new BusinessException(USER_NOT_FOUND));
 
         this.userMapper.mergeUserInfo(savedUser, request);
         this.userRepository.save(savedUser);
+
+        return userMapper.toUserResponse(savedUser);
     }
+
+
 
     @Override
     public void changePassword(ChangePasswordRequest request, final String userId) {
@@ -93,5 +96,13 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(()->new BusinessException(USER_NOT_FOUND));
         user.softDelete();
         userRepository.save(user);
+    }
+
+    @Override
+    public UserResponse getUserById(String id) {
+        User savedUser=userRepository.findById(id)
+                .orElseThrow(()->new BusinessException(USER_NOT_FOUND));
+
+        return userMapper.toUserResponse(savedUser);
     }
 }
