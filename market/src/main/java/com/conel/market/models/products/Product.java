@@ -37,7 +37,7 @@ public class Product extends BaseEntity {
 
     private String downloadUrl;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
@@ -50,7 +50,7 @@ public class Product extends BaseEntity {
     private User seller;
 
 
-    //Use PERSIST and MERGE. If a product updates, order records are untouched.
+    //Uses PERSIST and MERGE. If a product updates, order records are untouched.
     @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

@@ -1,57 +1,60 @@
 package com.conel.market.exception;
 
-import lombok.Getter;
-import org.springframework.http.HttpStatus;
-
-import static org.springframework.http.HttpStatus.*;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-
-@Getter
 public enum ErrorCode {
-    EMAIL_ALREADY_EXISTS("ERR_EMAIL_EXISTS", "Email already exists", CONFLICT),
-    EMAIL_CANNOT_BE_EMPTY("ERR_EMAIL_NEEDED","Email cannot be empty",CONFLICT),
-    PHONE_ALREADY_EXISTS("ERR_PHONE_EXISTS", "An account with this phone number already exists", CONFLICT),
-    PASSWORD_MISMATCH("ERR_PASSWORD_MISMATCH", "The password and confirmation do not match", BAD_REQUEST),
-    PASSWORD_REQUIRED("ERR_PASSWORD_NEEDED","Password cannot be empty",CONFLICT),
-    CHANGE_PASSWORD_MISMATCH("ERR_PASSWORD_MISMATCH", "New password and confirmation do not match", BAD_REQUEST),
-    ERR_SENDING_ACTIVATION_EMAIL("ERR_SENDING_ACTIVATION_EMAIL",
-            "An error occurred while sending the activation email",
-            HttpStatus.INTERNAL_SERVER_ERROR),
+    // Email
+    ERR_SENDING_ACTIVATION_EMAIL("EMAIL_001", "Failed to send activation email. Please try again later."),
+    EMAIL_CANNOT_BE_EMPTY("EMAIL_002", "Email cannot be empty"),
+    EMAIL_ALREADY_EXISTS("EMAIL_003", "Email already exists"),
 
-    ERR_USER_DISABLED("ERR_USER_DISABLED",
-            "User account is disabled, please activate your account or contact the administrator",
-            UNAUTHORIZED),
-    INVALID_CURRENT_PASSWORD("INVALID_CURRENT_PASSWORD", "The current password is incorrect", BAD_REQUEST),
-    USER_NOT_FOUND("USER_NOT_FOUND", "User not found", NOT_FOUND),
-    ACCOUNT_ALREADY_DEACTIVATED("ACCOUNT_ALREADY_DEACTIVATED", "Account has been deactivated", BAD_REQUEST),
-    ACCOUNT_ALREADY_ACTIVATED("ACCOUNT_ALREADY_ACTIVATED", "Account has been activated", BAD_REQUEST),
-    BAD_CREDENTIALS("BAD_CREDENTIALS", "Username and / or password is incorrect", UNAUTHORIZED),
-    INTERNAL_EXCEPTION("INTERNAL_EXCEPTION",
-            "An internal exception occurred, please try again or contact the admin",
-            HttpStatus.INTERNAL_SERVER_ERROR),
-    USERNAME_NOT_FOUND("USERNAME_NOT_FOUND", "Cannot find user with the provided username", NOT_FOUND),
-    CATEGORY_ALREADY_EXISTS_FOR_USER("CATEGORY_ALREADY_EXISTS_FOR_USER", "Category already exists for this user", CONFLICT),
-    ACCESS_DENIED("ACCESS_DENIED","You do not have permission to modify this product listing.",NOT_ACCEPTABLE),
-    INVALID_VENDOR_STATUS("INVALID_VENDOR_STATUS","Vendor is not in the required status for this operation",NOT_ACCEPTABLE),
-    VERIFICATION_TOKEN_ALREADY_USED("VERIFICATION_TOKEN_ALREADY_USED","your verification token has already been used",BAD_REQUEST),
-    VERIFICATION_TOKEN_EXPIRED("VERIFICATION_TOKEN_EXPIRED","your verification code has expired",BAD_REQUEST),
-    INVALID_VERIFICATION_TOKEN("INVALID_VERIFICATION_TOKEN", "Verification token is invalid or does not exist", BAD_REQUEST),
-    PRODUCT_ARCHIVED("ERR_PRODUCT_ARCHIVED", "This product is no longer available", NOT_FOUND),
-    INSUFFICIENT_STOCK("ERR_INSUFFICIENT_STOCK", "Not enough stock available for this product", BAD_REQUEST),
-    ;
+    // User
+    USER_NOT_FOUND("USER_001", "User not found"),
+    INVALID_CURRENT_PASSWORD("USER_002", "Current password is invalid"),
+    CHANGE_PASSWORD_MISMATCH("USER_003", "New password confirmation does not match"),
+    ACCOUNT_ALREADY_DEACTIVATED("USER_004", "Account is already deactivated"),
+    ACCOUNT_ALREADY_ACTIVATED("USER_005", "Account is already activated"),
+
+    // Phone
+    PHONE_ALREADY_EXISTS("PHONE_001", "Phone number already exists"),
+
+    // Products
+    PRODUCT_NOT_FOUND("PRODUCT_001", "Product not found"),
+    PRODUCT_ARCHIVED("PRODUCT_002", "Product is archived and cannot be ordered"),
+    INSUFFICIENT_STOCK("PRODUCT_003", "Insufficient stock for this product"),
+    PRODUCT_OWNER_MISMATCH("PRODUCT_004", "You do not have permission to modify this product"),
+
+    // Orders
+    ORDER_NOT_FOUND("ORDER_001", "Order not found"),
+    UNAUTHORIZED_ORDER_ACCESS("ORDER_002", "You do not have permission to view this order"),
+
+    // Vendor
+    VENDOR_NOT_FOUND("VENDOR_001", "Vendor not found"),
+    INVALID_VENDOR_STATUS("VENDOR_002", "Invalid vendor status for this operation"),
+
+    // Authentication
+    UNAUTHORIZED_ACCESS("AUTH_001", "You do not have permission to access this resource"),
+    INVALID_VERIFICATION_TOKEN("AUTH_002", "Invalid or expired verification token"),
+    VERIFICATION_TOKEN_ALREADY_USED("AUTH_003", "This verification token has already been used"),
+    VERIFICATION_TOKEN_EXPIRED("AUTH_004", "Verification token has expired"),
+
+    // Categories
+    CATEGORY_NOT_FOUND("CATEGORY_001", "Category not found"),
+
+    // Generic
+    INTERNAL_SERVER_ERROR("ERR_001", "An unexpected error occurred");
 
     private final String code;
+    private final String message;
 
-    private final String defaultMessage;
-
-    private final HttpStatus httpStatus;
-
-    ErrorCode(String code, String defaultMessage, HttpStatus status) {
+    ErrorCode(String code, String message) {
         this.code = code;
-        this.defaultMessage = defaultMessage;
-        this.httpStatus = status;
+        this.message = message;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }

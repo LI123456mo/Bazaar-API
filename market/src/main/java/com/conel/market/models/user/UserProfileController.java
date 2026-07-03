@@ -18,7 +18,7 @@ public class UserProfileController {
 
 
     @PutMapping("/profile/password")
-    @PreAuthorize("hasRole('user:read')")
+    @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<String> changePassword(
             @Valid @RequestBody ChangePasswordRequest request,
             @AuthenticationPrincipal User currentUser) {
@@ -29,7 +29,7 @@ public class UserProfileController {
 
 
     @PatchMapping("/profile/deactivate")
-    @PreAuthorize("hasRole('user:read')")
+    @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<Void> deactivateAccount(@AuthenticationPrincipal User currentUser) {
         userService.deactivateAccount(currentUser.getId());
         return ResponseEntity.noContent().build();
@@ -37,7 +37,7 @@ public class UserProfileController {
 
 
     @PatchMapping("/{userId}/reactivate")
-    @PreAuthorize("hasRole('user:read')")
+    @PreAuthorize("hasAuthority('user:manage')")
     public ResponseEntity<Void> reactivateAccount(@PathVariable String userId) {
         userService.reactivateAccount(userId);
         return ResponseEntity.noContent().build();
@@ -45,7 +45,7 @@ public class UserProfileController {
 
 
     @DeleteMapping("/{userId}")
-    @PreAuthorize("hasRole('user:read')")
+    @PreAuthorize("hasAuthority('user:manage')")
     public ResponseEntity<Void> deleteAccount(@PathVariable String userId) {
         userService.deleteAccount(userId);
         return ResponseEntity.noContent().build();
