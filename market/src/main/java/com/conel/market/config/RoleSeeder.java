@@ -1,9 +1,9 @@
 package com.conel.market.config;
 
-import com.conel.market.models.role.Role;
-import com.conel.market.models.role.RoleRepository;
-import com.conel.market.models.user.User;
-import com.conel.market.models.user.UserRepository;
+import com.conel.market.entity.role.Role;
+import com.conel.market.repository.role.RoleRepository;
+import com.conel.market.user.entity.User;
+import com.conel.market.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;

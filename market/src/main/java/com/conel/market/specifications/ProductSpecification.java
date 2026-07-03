@@ -1,6 +1,6 @@
 package com.conel.market.specifications;
 
-import com.conel.market.models.products.Product;
+import com.conel.market.entity.product.Product;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 

@@ -1,6 +1,6 @@
 package com.conel.market.validation;
 
-import com.conel.market.auth.request.RegistrationRequest;
+import com.conel.market.auth.dto.request.RegistrationRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

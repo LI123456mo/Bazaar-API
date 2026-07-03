@@ -12,7 +12,7 @@ import java.nio.file.StandardCopyOption;
 
 @Service
 @Slf4j
-public class LocalFileStorageService implements FileStorageService{
+public class LocalFileStorageService implements FileStorageService {
     private final String uploadDir="uploads";
 
     @Override
