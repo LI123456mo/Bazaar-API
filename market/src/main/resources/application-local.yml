@@ -17,7 +17,20 @@ spring:
       hibernate:
         format_sql: true
 
-  # =====  SPRING AI CONFIG =====
+        #SMTP
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USERNAME}
+    password: &{GMAIL_APP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  #SPRING AI CONFIG
   ai:
     openai:
       api-key: ${GROG_API}
@@ -26,7 +39,7 @@ spring:
         options:
           model: llama-3.1-8b-instant
 
-      # Keep using Ollama JUST for embeddings (nomic-embed-text)
+      # Keeps using Ollama JUST for embeddings (nomic-embed-text)
       # Groq doesn't do embeddings, only chat
     ollama:
       base-url: http://localhost:11434
