@@ -7,4 +7,8 @@ import java.util.Optional;
 
 public interface RoleRepository extends JpaRepository<Role,String> {
     Optional<Role> findByName(String roleUser);
+
+
+    // JPA auto-implemented method to check existence by name (idempotent seeding)
+    boolean existsByName(String name);
 }

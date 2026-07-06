@@ -51,20 +51,22 @@ logging:
     name: logs/bazaar.log
     max-size: 10MB
     max-history: 30
-
 app:
   security:
     jwt:
-      access-token-expiration:  86400000  #900000  15 minutes (not 24 hours!)
-      refresh-token-expiration: 604800000 # 7 days
+      access-token-expiration: 86400000
+      refresh-token-expiration: 604800000
 
-  # ADD EMAIL CONFIG
   email:
-    verification-token-expiry: 24 # hours
+    verification-token-expiry: 24
     from: ${MAIL_FROM:noreply@bazaar.local}
     sender-name: ${MAIL_SENDER_NAME:Bazaar Platform}
 
-  # ADD FILE UPLOAD CONFIG
   file-storage:
     upload-dir: ${FILE_UPLOAD_DIR:./uploads}
-    max-file-size: 10485760 # 10MB in bytes
+    max-file-size: 10485760
+
+  admin:                          # ← same level as security, email, file-storage
+    email: ${ADMIN_EMAIL:admin@bazaar.local}
+    password: ${ADMIN_PASSWORD:ChangeMe@123}
+    phone: ${ADMIN_PHONE:0000000000}

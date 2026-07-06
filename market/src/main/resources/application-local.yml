@@ -45,10 +45,3 @@ spring:
       base-url: http://localhost:11434
       embedding:
         model: nomic-embed-text
-
-#logging:
-#  level:
-#    org.springframework.security: DEBUG
-#    org.springframework.security.authentication.dao.DaoAuthenticationProvider: TRACE
-#    org.hibernate.SQL: DEBUG
-#    org.hibernate.orm.results: TRACE

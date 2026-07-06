@@ -6,9 +6,12 @@ import com.conel.market.user.entity.User;
 import com.conel.market.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,11 +19,22 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@Order(1)
+@Transactional
 public class RoleSeeder implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${app.admin.email}")
+    private String adminEmail;
+
+    @Value("${app.admin.password}")
+    private String adminPassword;
+
+    @Value("${app.admin.phone}")
+    private String adminPhone;
 
     @Override
     public void run(String... args) throws Exception {
@@ -31,60 +45,51 @@ public class RoleSeeder implements CommandLineRunner {
     }
 
     private void seedRoles() {
-        roleRepository.findByName("CUSTOMER")
-                .ifPresentOrElse(
-                        role -> log.debug("customer role already exist"),
-                        ()->{
-                            Role customerRole= Role.builder()
-                                    .name("CUSTOMER")
-                                    .build();
-                            roleRepository.save(customerRole);
-                        }
-                );
+        if (!roleRepository.existsByName("CUSTOMER")) {
+            Role customerRole = Role.builder()
+                    .name("CUSTOMER")
+                    .build();
+            roleRepository.save(customerRole);
+            log.info("Created CUSTOMER role");
+        } else {
+            log.debug("CUSTOMER role already exists");
+        }
 
+        if (!roleRepository.existsByName("VENDOR")) {
+            Role vendorRole = Role.builder()
+                    .name("VENDOR")
+                    .build();
+            roleRepository.save(vendorRole);
+            log.info("Created VENDOR role");
+        } else {
+            log.debug("VENDOR role already exists");
+        }
 
-        roleRepository.findByName("VENDOR")
-                .ifPresentOrElse(
-                        role -> log.debug("VENDOR role already exist"),
-                        ()->{
-                            Role vendorRole=Role.builder()
-                                    .name("VENDOR")
-                                    .build();
-                            roleRepository.save(vendorRole);
-                            log.info("Created VENDOR role");
-                        }
-                );
+        if (!roleRepository.existsByName("ADMIN")) {
+            Role adminRole = Role.builder()
+                    .name("ADMIN")
+                    .build();
+            roleRepository.save(adminRole);
+            log.info("Created ADMIN role");
+        } else {
+            log.debug("ADMIN role already exists");
+        }
 
-        roleRepository.findByName("ADMIN")
-                .ifPresentOrElse(
-                        role -> log.debug("ADMIN role already exists"),
-                        () -> {
-                            Role adminRole = Role.builder()
-                                    .name("ADMIN")
-                                    .build();
-                            roleRepository.save(adminRole);
-                            log.info("Created ADMIN role");
-                        }
-                );
-
-
-        roleRepository.findByName("SUPER_ADMIN")
-                .ifPresentOrElse(
-                        role -> log.debug("✓ SUPER_ADMIN role already exists"),
-                        ()->{
-                            Role superAdminRole=Role.builder()
-                                    .name("SUPER_ADMIN")
-                                    .build();
-                            roleRepository.save(superAdminRole);
-                            log.info("✓ Created SUPER_ADMIN role");
-                        }
-                );
+        if (!roleRepository.existsByName("SUPER_ADMIN")) {
+            Role superAdminRole = Role.builder()
+                    .name("SUPER_ADMIN")
+                    .build();
+            roleRepository.save(superAdminRole);
+            log.info("Created SUPER_ADMIN role");
+        } else {
+            log.debug("SUPER_ADMIN role already exists");
+        }
     }
 
     private void seedSuperAdmin() {
-        boolean superAdminExists=userRepository.existsByEmailIgnoreCase("conellimo@gmail.com");
+        boolean superAdminExists = userRepository.existsByEmailIgnoreCase(adminEmail);
 
-        if (superAdminExists){
+        if (superAdminExists) {
             log.debug("Super admin user already exists");
             return;
         }
@@ -92,13 +97,13 @@ public class RoleSeeder implements CommandLineRunner {
         Role superAdminRole = roleRepository.findByName("SUPER_ADMIN")
                 .orElseThrow(() -> new RuntimeException("SUPER_ADMIN role not found"));
 
-        User superAdmin=User.builder()
+        User superAdmin = User.builder()
                 .firstName("System")
                 .lastName("Administrator")
-                .email("conellimo@gmail.com")
-                .phoneNumber("0706440885")
-                .password(passwordEncoder.encode("SuperAdmin@123"))
-                .dateOfBirth(LocalDate.of(2004,5,31))
+                .email(adminEmail)
+                .phoneNumber(adminPhone)
+                .password(passwordEncoder.encode(adminPassword))
+                .dateOfBirth(LocalDate.of(2004, 5, 31))
                 .emailVerified(true)
                 .phoneVerified(true)
                 .enabled(true)
@@ -111,6 +116,6 @@ public class RoleSeeder implements CommandLineRunner {
                 .build();
 
         userRepository.save(superAdmin);
-        log.info("Created SUPER_ADMIN user: conellimo@gamil.com (Password: SuperAdmin@123 — CHANGE IN PRODUCTION!)");
+        log.info("Created SUPER_ADMIN user: {} (Password: {} — CHANGE IN PRODUCTION!)",adminEmail,adminPassword);
     }
 }
