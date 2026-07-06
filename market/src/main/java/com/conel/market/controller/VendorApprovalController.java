@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/admin/vendors")
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('vendor:approve')")
 public class VendorApprovalController {
 
     private final VendorApprovalService vendorApprovalService;

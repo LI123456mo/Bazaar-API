@@ -19,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -73,14 +75,14 @@ public class OrderService {
         for (OrderItemRequest itemDto : request.items()) {
             Product product = products.get(index++);
 
-           Product lockeProduct=productService.getProductEntityWithLock(product.getId());
+            Product lockeProduct=productService.getProductEntityWithLock(product.getId());
 
-           if (lockeProduct.getStockQuantity()<itemDto.quantity()){
-               throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
-           }
+            if (lockeProduct.getStockQuantity()<itemDto.quantity()){
+                throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
+            }
 
-           lockeProduct.setStockQuantity(lockeProduct.getStockQuantity()- itemDto.quantity());
-           productService.saveProduct(lockeProduct);
+            lockeProduct.setStockQuantity(lockeProduct.getStockQuantity()- itemDto.quantity());
+            productService.saveProduct(lockeProduct);
 
 
             double itemPriceAtPurchase = lockeProduct.getPrice();
@@ -173,7 +175,24 @@ public class OrderService {
     }
 
 
+    /**
+     * Validate that the currently authenticated user is allowed to view this order.
+     * Allows access if:
+     *  - the order belongs to the authenticated user
+     *  - OR the current authentication has authority "order:read_all" (admin override)
+     *
+     * Throws BusinessException(ErrorCode.ACCESS_DENIED) if not allowed.
+     */
     public void validateOwnership(Order order,String authenticatedUserId){
+        // Check for admin-level authority
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(a -> "order:read_all".equals(a.getAuthority()))) {
+            // Has admin-level permission to read any order
+            return;
+        }
+
+        // Otherwise require that the owner matches
         if (!order.getUser().getId().equals(authenticatedUserId)) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
