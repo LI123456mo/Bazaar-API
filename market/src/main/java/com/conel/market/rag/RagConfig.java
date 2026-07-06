@@ -1,4 +1,4 @@
-package com.conel.market.config;
+package com.conel.market.rag;
 
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.SimpleVectorStore;
