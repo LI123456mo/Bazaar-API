@@ -26,7 +26,6 @@ public class GlobalExceptionHandler {
 
         ErrorCode errorCode = ex.getErrorCode();
         ApiErrorResponse response = ApiErrorResponse.builder()
-                .status(errorCode.getHttpStatus().value())
                 .error(errorCode.name())
                 .message(ex.getMessage())
                 .path(request.getDescription(false).replace("uri=", ""))
@@ -34,7 +33,7 @@ public class GlobalExceptionHandler {
                 .build();
 
         log.warn("Business error: {}", ex.getMessage());
-        return new ResponseEntity<>(response, errorCode.getHttpStatus());
+        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -111,5 +110,21 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(org.hibernate.StaleObjectStateException.class)
+    public ResponseEntity<ApiErrorResponse> handleOptimisticLockException(
+            org.hibernate.StaleObjectStateException ex,
+            WebRequest request) {
+
+        ApiErrorResponse response = ApiErrorResponse.builder()
+                .status(HttpStatus.CONFLICT.value())
+                .error("CONCURRENT_MODIFICATION")
+                .message("Product was modified by another user. Please try again.")
+                .path(request.getDescription(false).replace("uri=", ""))
+                .timestamp(java.time.LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 }

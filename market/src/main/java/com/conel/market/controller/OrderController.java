@@ -33,7 +33,7 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('order:read')") // Ensures transaction receipts are protected
+    @PreAuthorize("hasAuthority('order:read') or hasAuthority('order:read_all')") // allow admins with read_all
     public ResponseEntity<OrderResponse> getOrderById(
             @PathVariable("id") String id,
             @AuthenticationPrincipal User authenticatedUser

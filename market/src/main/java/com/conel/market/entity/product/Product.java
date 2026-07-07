@@ -31,10 +31,13 @@ public class Product extends BaseEntity {
     @Column(nullable = false)
     private Integer stockQuantity;
 
+    // Optimistic locking — prevents race condition when
+    // multiple customers buy the same product simultaneously
+    @Version
+    private Long version;
+
     private boolean active = true;
-
     private String imageUrl;
-
     private String downloadUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,8 +52,6 @@ public class Product extends BaseEntity {
     @EqualsAndHashCode.Exclude
     private User seller;
 
-
-    //Uses PERSIST and MERGE. If a product updates, order records are untouched.
     @OneToMany(mappedBy = "product", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

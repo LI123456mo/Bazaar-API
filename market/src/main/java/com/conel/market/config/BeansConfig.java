@@ -40,7 +40,7 @@ public class BeansConfig {
 
     @Bean
     public AuditorAware<String> auditorAware() {
-        return new AppalicationAuditorAware();
+        return new ApplicationAuditorAware();
     }
 
     @Bean

@@ -17,6 +17,7 @@ import com.conel.market.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -38,88 +39,93 @@ public class OrderService {
 
     @Transactional
     public OrderResponse placeOrder(OrderRequest request,String authenticatedUserId) {
-        User buyer = userRepository.findById(authenticatedUserId)
-                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+        try {
+            User buyer = userRepository.findById(authenticatedUserId)
+                    .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        List<Product> products=new ArrayList<>();
+            List<Product> products=new ArrayList<>();
 
-        for(OrderItemRequest itemDto:request.items()){
-            Product product=productService.getProductEntity(itemDto.productId());
+            for(OrderItemRequest itemDto:request.items()){
+                Product product=productService.getProductEntity(itemDto.productId());
 
-            if (!product.isActive()) {
-                throw new BusinessException(ErrorCode.PRODUCT_ARCHIVED);
+                if (!product.isActive()) {
+                    throw new BusinessException(ErrorCode.PRODUCT_ARCHIVED);
+                }
+
+                if (product.getStockQuantity() < itemDto.quantity()) {
+                    throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
+                }
+
+                products.add(product);
             }
 
-            if (product.getStockQuantity() < itemDto.quantity()) {
-                throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
-            }
-
-            products.add(product);
-        }
-
-        Order order = Order.builder()
-                .status(OrderStatus.PENDING)
-                .paymentMethod(request.paymentMethod())
-                .shippingAddress(request.shippingAddress())
-                .user(buyer)
-                .buyerEmailSnapshot(buyer.getEmail())
-                .buyerNameSnapshot(buyer.getFirstName()+" "+buyer.getLastName())
-                .orderItems(new ArrayList<>())
-                .totalAmount(0.0)
-                .build();
-
-        double runningTotalAmount = 0.0;
-        List<OrderItemResponse> responseItemsList = new ArrayList<>();
-
-        int index=0;
-        for (OrderItemRequest itemDto : request.items()) {
-            Product product = products.get(index++);
-
-            Product lockeProduct=productService.getProductEntityWithLock(product.getId());
-
-            if (lockeProduct.getStockQuantity()<itemDto.quantity()){
-                throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
-            }
-
-            lockeProduct.setStockQuantity(lockeProduct.getStockQuantity()- itemDto.quantity());
-            productService.saveProduct(lockeProduct);
-
-
-            double itemPriceAtPurchase = lockeProduct.getPrice();
-            double itemSubTotal = itemPriceAtPurchase * itemDto.quantity();
-            runningTotalAmount += itemSubTotal;
-
-            OrderItem orderItem = OrderItem.builder()
-                    .order(order)
-                    .product(lockeProduct)
-                    .quantity(itemDto.quantity())
-                    .priceAtPurchase(itemPriceAtPurchase)
+            Order order = Order.builder()
+                    .status(OrderStatus.PENDING)
+                    .paymentMethod(request.paymentMethod())
+                    .shippingAddress(request.shippingAddress())
+                    .user(buyer)
+                    .buyerEmailSnapshot(buyer.getEmail())
+                    .buyerNameSnapshot(buyer.getFirstName()+" "+buyer.getLastName())
+                    .orderItems(new ArrayList<>())
+                    .totalAmount(0.0)
                     .build();
 
-            order.getOrderItems().add(orderItem);
+            double runningTotalAmount = 0.0;
+            List<OrderItemResponse> responseItemsList = new ArrayList<>();
 
-            responseItemsList.add(new OrderItemResponse(
-                    product.getId(),
-                    product.getName(),
-                    itemPriceAtPurchase,
-                    itemDto.quantity(),
-                    itemSubTotal
-            ));
+            int index=0;
+            for (OrderItemRequest itemDto : request.items()) {
+                Product product = products.get(index++);
+
+                Product lockeProduct=productService.getProductEntityWithLock(product.getId());
+
+                if (lockeProduct.getStockQuantity()<itemDto.quantity()){
+                    throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
+                }
+
+                lockeProduct.setStockQuantity(lockeProduct.getStockQuantity()- itemDto.quantity());
+                productService.saveProduct(lockeProduct);
+
+
+                double itemPriceAtPurchase = lockeProduct.getPrice();
+                double itemSubTotal = itemPriceAtPurchase * itemDto.quantity();
+                runningTotalAmount += itemSubTotal;
+
+                OrderItem orderItem = OrderItem.builder()
+                        .order(order)
+                        .product(lockeProduct)
+                        .quantity(itemDto.quantity())
+                        .priceAtPurchase(itemPriceAtPurchase)
+                        .build();
+
+                order.getOrderItems().add(orderItem);
+
+                responseItemsList.add(new OrderItemResponse(
+                        product.getId(),
+                        product.getName(),
+                        itemPriceAtPurchase,
+                        itemDto.quantity(),
+                        itemSubTotal
+                ));
+            }
+
+            order.setTotalAmount(runningTotalAmount);
+            Order savedOrder = orderRepository.save(order);
+
+            log.info("Order created: {} for user: {}", savedOrder.getId(), buyer.getEmail());
+
+            return new OrderResponse(
+                    savedOrder.getId(),
+                    savedOrder.getTotalAmount(),
+                    savedOrder.getStatus().name(),
+                    savedOrder.getPaymentMethod(),
+                    savedOrder.getShippingAddress(),
+                    responseItemsList
+            );
+        }catch (OptimisticLockingFailureException e) {
+            // Two people tried to buy the last item simultaneously
+            throw new BusinessException(ErrorCode.PRODUCT_OUT_OF_STOCK);
         }
-
-        order.setTotalAmount(runningTotalAmount);
-        Order savedOrder = orderRepository.save(order);
-
-        log.info("Order created: {} for user: {}", savedOrder.getId(), buyer.getEmail());
-
-        return new OrderResponse(
-                savedOrder.getId(),
-                savedOrder.getTotalAmount(),
-                savedOrder.getStatus().name(),
-                savedOrder.getPaymentMethod(),
-                savedOrder.getShippingAddress(),
-                responseItemsList
-        );
     }
 
     @Transactional(readOnly = true)

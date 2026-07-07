@@ -21,6 +21,7 @@ public enum ErrorCode {
     PRODUCT_ARCHIVED("PRODUCT_002", "Product is archived and cannot be ordered"),
     INSUFFICIENT_STOCK("PRODUCT_003", "Insufficient stock for this product"),
     PRODUCT_OWNER_MISMATCH("PRODUCT_004", "You do not have permission to modify this product"),
+    PRODUCT_OUT_OF_STOCK("PRODUCT_OUT_OF_STOCK", "Product is out of stock or no longer available"),
 
     // Orders
     ORDER_NOT_FOUND("ORDER_001", "Order not found"),
@@ -35,12 +36,14 @@ public enum ErrorCode {
     INVALID_VERIFICATION_TOKEN("AUTH_002", "Invalid or expired verification token"),
     VERIFICATION_TOKEN_ALREADY_USED("AUTH_003", "This verification token has already been used"),
     VERIFICATION_TOKEN_EXPIRED("AUTH_004", "Verification token has expired"),
+    ACCESS_DENIED("AUTH_004","Invalid owner"),
 
     // Categories
     CATEGORY_NOT_FOUND("CATEGORY_001", "Category not found"),
 
     // Generic
-    INTERNAL_SERVER_ERROR("ERR_001", "An unexpected error occurred");
+    INTERNAL_SERVER_ERROR("ERR_001", "An unexpected error occurred"),
+    INVALID_PASSWORD("ERR_001", "Invalid password");
 
     private final String code;
     private final String message;
