@@ -43,7 +43,9 @@ public enum ErrorCode {
 
     // Generic
     INTERNAL_SERVER_ERROR("ERR_001", "An unexpected error occurred"),
-    INVALID_PASSWORD("ERR_001", "Invalid password");
+    INVALID_PASSWORD("ERR_001", "Invalid password"),
+    PASSWORD_REQUIRED("ERR_001","Please provide the password"),
+    PASSWORD_MISMATCH("ERR_001","The passwords does not match");
 
     private final String code;
     private final String message;
