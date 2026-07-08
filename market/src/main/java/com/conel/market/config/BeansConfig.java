@@ -38,10 +38,6 @@ public class BeansConfig {
         return config.getAuthenticationManager();
     }
 
-    @Bean
-    public AuditorAware<String> auditorAware() {
-        return new ApplicationAuditorAware();
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder(){

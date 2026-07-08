@@ -18,19 +18,15 @@ public class JpaAuditingConfig {
 
     @Bean(name = "auditorAware")
     public AuditorAware<String> auditorProvider() {
-        return new AuditorAware<String>() {
-            @Override
-            public Optional<String> getCurrentAuditor() {
+        return ()-> {
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-                // Skip if not authenticated or anonymous
                 if (authentication == null || !authentication.isAuthenticated() ||
                         authentication instanceof AnonymousAuthenticationToken) {
                     return Optional.empty();
                 }
 
                 return Optional.ofNullable(authentication.getName());
-            }
         };
     }
 }
