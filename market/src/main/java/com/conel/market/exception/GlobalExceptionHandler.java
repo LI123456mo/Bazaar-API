@@ -3,17 +3,17 @@ package com.conel.market.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException; // ← FIXED IMPORT
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
-import java.nio.file.AccessDeniedException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestControllerAdvice
@@ -26,6 +26,7 @@ public class GlobalExceptionHandler {
 
         ErrorCode errorCode = ex.getErrorCode();
         ApiErrorResponse response = ApiErrorResponse.builder()
+                .status(errorCode.getHttpStatus().value())
                 .error(errorCode.name())
                 .message(ex.getMessage())
                 .path(request.getDescription(false).replace("uri=", ""))
@@ -33,7 +34,7 @@ public class GlobalExceptionHandler {
                 .build();
 
         log.warn("Business error: {}", ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.FORBIDDEN);
+        return new ResponseEntity<>(response, errorCode.getHttpStatus());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -45,7 +46,7 @@ public class GlobalExceptionHandler {
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
-            fieldErrors.computeIfAbsent(fieldName, k -> new java.util.ArrayList<>())
+            fieldErrors.computeIfAbsent(fieldName, k -> new ArrayList<>())
                     .add(errorMessage);
         });
 
@@ -60,7 +61,6 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
-
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(
@@ -94,6 +94,21 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(org.hibernate.StaleObjectStateException.class)
+    public ResponseEntity<ApiErrorResponse> handleOptimisticLockException(
+            org.hibernate.StaleObjectStateException ex,
+            WebRequest request) {
+
+        ApiErrorResponse response = ApiErrorResponse.builder()
+                .status(HttpStatus.CONFLICT.value())
+                .error("CONCURRENT_MODIFICATION")
+                .message("Product was modified by another user. Please try again.")
+                .path(request.getDescription(false).replace("uri=", ""))
+                .timestamp(java.time.LocalDateTime.now())
+                .build();
+
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGenericException(
@@ -110,21 +125,5 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @ExceptionHandler(org.hibernate.StaleObjectStateException.class)
-    public ResponseEntity<ApiErrorResponse> handleOptimisticLockException(
-            org.hibernate.StaleObjectStateException ex,
-            WebRequest request) {
-
-        ApiErrorResponse response = ApiErrorResponse.builder()
-                .status(HttpStatus.CONFLICT.value())
-                .error("CONCURRENT_MODIFICATION")
-                .message("Product was modified by another user. Please try again.")
-                .path(request.getDescription(false).replace("uri=", ""))
-                .timestamp(java.time.LocalDateTime.now())
-                .build();
-
-        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 }

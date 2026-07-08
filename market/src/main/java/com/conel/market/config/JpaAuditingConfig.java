@@ -28,7 +28,7 @@ public class JpaAuditingConfig {
                         authentication instanceof AnonymousAuthenticationToken) {
                     return Optional.empty();
                 }
-                
+
                 return Optional.ofNullable(authentication.getName());
             }
         };

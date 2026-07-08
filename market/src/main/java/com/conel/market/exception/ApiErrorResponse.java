@@ -20,7 +20,7 @@ public class ApiErrorResponse {
     private String path;
     private LocalDateTime timestamp;
     private String requestId;
-    private Map<String, List<String>> fieldErrors;//validation errors
+    private Map<String, List<String>> fieldErrors;
 
     public static ApiErrorResponse of(int status, String error, String message, String path){
         return ApiErrorResponse.builder()
