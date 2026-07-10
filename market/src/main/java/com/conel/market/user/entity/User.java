@@ -69,7 +69,7 @@ public class User implements UserDetails {
     @Column(nullable = true)
     private VendorStatus vendorStatus=VendorStatus.PENDING_APPROVAL;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     @Builder.Default
     private boolean vendorApproved=false;
 
