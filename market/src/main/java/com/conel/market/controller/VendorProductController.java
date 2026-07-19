@@ -21,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/v1/vendors/products")
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('product:create')")
 public class VendorProductController {
 
     private final ProductService productService;
@@ -46,6 +45,7 @@ public class VendorProductController {
     }
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PreAuthorize("hasAuthority('product:create')")
     public ResponseEntity<ProductResponse> createProduct(
             @Valid @RequestPart("product") ProductRequest request,
             @RequestPart("file") MultipartFile file,
@@ -56,6 +56,7 @@ public class VendorProductController {
     }
 
     @PutMapping("/{productId}")
+    @PreAuthorize("hasAuthority('product:update')")
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable String productId,
             @Valid @RequestPart("product") ProductRequest request,
@@ -63,13 +64,14 @@ public class VendorProductController {
             @AuthenticationPrincipal User authenticatedUser) {
         String fileName = null;
         if (file != null && !file.isEmpty()) {
-            String filename = fileStorageService.saveFile(file);
+            fileName = fileStorageService.saveFile(file);
         }
         ProductResponse response = productService.updateVendorProduct(productId, request, fileName, authenticatedUser);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{productId}")
+    @PreAuthorize("hasAuthority('product:delete')")
     public ResponseEntity<Void> deleteProduct(
             @PathVariable String productId,
             @AuthenticationPrincipal User authenticatedUser) {

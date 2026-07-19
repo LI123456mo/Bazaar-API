@@ -116,6 +116,7 @@ public class RoleSeeder implements CommandLineRunner {
                 .build();
 
         userRepository.save(superAdmin);
-        log.info("Created SUPER_ADMIN user: {} (Password: {} — CHANGE IN PRODUCTION!)",adminEmail,adminPassword);
+        // Never log secrets in production; the account is seeded but the password stays private.
+        log.info("Created SUPER_ADMIN user: {} (password omitted)", adminEmail);
     }
 }

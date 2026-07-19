@@ -12,11 +12,14 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.constraints.NotBlank;
 
 @RestController
 @RequestMapping("api/v1/auth")
 @RequiredArgsConstructor
+@Validated
 @Tag(name = "Authentication", description = "Authentication API")
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
@@ -24,6 +27,7 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> login(
+            @Valid
             @RequestBody
             final AuthenticationRequest request
     ){
@@ -39,8 +43,9 @@ public class AuthenticationController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PostMapping("refresh")
+    @PostMapping("/refresh")
     public ResponseEntity<AuthenticationResponse> refresh(
+            @Valid
             @RequestBody
             final RefreshRequest request
             ){
@@ -55,7 +60,7 @@ public class AuthenticationController {
 
 
     @PostMapping("/verify-email")
-    public ResponseEntity<Void> verifyEmail(@RequestParam String token) {
+    public ResponseEntity<Void> verifyEmail(@RequestParam @NotBlank String token) {
         userVerificationService.verifyEmail(token);
         return ResponseEntity.ok().build();
     }

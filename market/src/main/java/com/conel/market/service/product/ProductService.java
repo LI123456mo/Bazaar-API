@@ -15,6 +15,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -36,6 +37,9 @@ public class ProductService {
     private final ProductMapper productMapper;
     private final CategoryRepository categoryRepository;
     private final EntityManager entityManager;
+
+    @Value("${app.file-storage.upload-dir:./uploads}")
+    private String uploadDir;
 
     @Transactional
     public ProductResponse saveProduct(ProductRequest dto, String fileName, String userId) {
@@ -66,8 +70,8 @@ public class ProductService {
             String oldFileName = existingProduct.getImageUrl();
             if (oldFileName != null) {
                 try {
-                    // TODO //Consider moving path logic to FileStorageService later for clean separation
-                    Path oldFilePath = Paths.get("uploads").resolve(oldFileName);
+                    // Use the configured upload directory so cleanup stays aligned with storage and static serving.
+                    Path oldFilePath = Paths.get(uploadDir).resolve(oldFileName);
                     Files.deleteIfExists(oldFilePath);
                 } catch (IOException e) {
                     log.warn("Could not delete old file from file system: {}", e.getMessage());
@@ -217,8 +221,10 @@ public class ProductService {
 
         if (newFileName != null) {
             try {
-                Path oldFilePath = Paths.get("uploads").resolve(product.getImageUrl());
-                Files.deleteIfExists(oldFilePath);
+                if (product.getImageUrl() != null) {
+                    Path oldFilePath = Paths.get(uploadDir).resolve(product.getImageUrl());
+                    Files.deleteIfExists(oldFilePath);
+                }
             } catch (IOException e) {
                 log.warn("Could not delete old file: {}", e.getMessage());
             }
@@ -229,6 +235,13 @@ public class ProductService {
         product.setDescription(dto.description());
         product.setPrice(dto.price());
         product.setStockQuantity(dto.stockQuantity());
+
+        if (dto.categoryId() != null) {
+            // Vendor edits should also be able to move a product between categories.
+            Category newCategory = categoryRepository.findById(dto.categoryId())
+                    .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + dto.categoryId()));
+            product.setCategory(newCategory);
+        }
 
         return productMapper.toProductResponseDto(productRepository.save(product));
     }
@@ -264,7 +277,7 @@ public class ProductService {
         }
 
         boolean isAdmin = user.getAuthorities().stream()
-                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("admin:access"));
 
         boolean isOwner = product.getSeller() != null && product.getSeller().getId().equals(user.getId());
 

@@ -3,18 +3,20 @@ package com.conel.market.controller;
 import com.conel.market.user.service.vendor.VendorApprovalService;
 import com.conel.market.user.dto.response.VendorResponse;
 import com.conel.market.entity.vendor.VendorStatus;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/admin/vendors")
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('vendor:approve')")
+@Validated
 public class VendorApprovalController {
 
     private final VendorApprovalService vendorApprovalService;
@@ -32,7 +34,7 @@ public class VendorApprovalController {
     @PreAuthorize("hasAuthority('vendor:approve')")
     public ResponseEntity<Void> rejectVendor(
             @PathVariable String vendorId,
-            @RequestParam String reason
+            @RequestParam @NotBlank String reason
     ){
         vendorApprovalService.rejectVendor(vendorId,reason);
         return ResponseEntity.noContent().build();
@@ -42,7 +44,7 @@ public class VendorApprovalController {
     @PreAuthorize("hasAuthority('vendor:suspend')")
     public ResponseEntity<Void> suspendVendor(
             @PathVariable String vendorId,
-            @RequestParam String reason
+            @RequestParam @NotBlank String reason
     ){
         vendorApprovalService.suspendVendor(vendorId,reason);
         return ResponseEntity.noContent().build();

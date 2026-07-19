@@ -67,6 +67,7 @@ public class UserProfileController {
     @PreAuthorize("hasAuthority('user:update')")
     public ResponseEntity<UserResponse> updateProfile(
             @AuthenticationPrincipal User authenticatedUser,
+            @Valid
             @RequestBody UserProfileUpdateRequest request
     ){
         UserResponse updatedUser = userService.updateProfileInfo(request,authenticatedUser.getId());

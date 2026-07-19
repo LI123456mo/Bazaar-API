@@ -2,6 +2,7 @@ package com.conel.market.rag;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -14,10 +15,11 @@ public class CodeQAController {
     private final CodeIndexerService indexerService;
     private final CodeQAService qaService;
 
-    // Call this ONCE to index  project into ChromaDB
+    // Only admins should be able to re-index the source tree; a caller-supplied path would expose the filesystem.
     @PostMapping("/index")
-    public ResponseEntity<String> index(@RequestParam String path) throws IOException {
-        String result = indexerService.indexCodebase(path);
+    @PreAuthorize("hasAuthority('admin:access')")
+    public ResponseEntity<String> index() throws IOException {
+        String result = indexerService.indexCodebase();
         return ResponseEntity.ok(result);
     }
 

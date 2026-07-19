@@ -24,6 +24,9 @@ public class UserVerificationService {
     @Value("${app.email.verification-token-expiry:24}")
     private int tokenExpiryHours;
 
+    @Value("${app.email.verification-base-url}")
+    private String verificationBaseUrl;
+
     private final UserRepository userRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
@@ -45,7 +48,8 @@ public class UserVerificationService {
 
         verificationTokenRepository.save(verificationToken);
 
-        String verificationUrl = "https://yourdomain.com/api/v1/auth/verify?token=" + token;
+        // The email must point to the real controller route; a stale placeholder URL breaks verification in production.
+        String verificationUrl = verificationBaseUrl + "/api/v1/auth/verify-email?token=" + token;
         emailService.sendVerificationEmail(user.getEmail(), user.getFirstName(), verificationUrl);
 
         log.info("Verification email sent to {}", user.getEmail());

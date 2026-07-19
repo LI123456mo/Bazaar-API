@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public UserResponse updateProfileInfo(UserProfileUpdateRequest request, String userId) {
         User savedUser = userRepository.findById(userId)
                 .orElseThrow(()->new BusinessException(USER_NOT_FOUND));
@@ -50,6 +50,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
+    @Transactional
     public void changePassword(ChangePasswordRequest request, final String userId) {
         if (!request.getNewPassword().equals(request.getConfirmNewPassword())){
             throw new BusinessException(CHANGE_PASSWORD_MISMATCH);
@@ -68,6 +69,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deactivateAccount(String userId) {
         final User user=this.userRepository.findById(userId)
                 .orElseThrow(()->new BusinessException(USER_NOT_FOUND));
@@ -81,6 +83,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void reactivateAccount(String userId) {
         final User user=this.userRepository.findById(userId)
                 .orElseThrow(()->new BusinessException(USER_NOT_FOUND));

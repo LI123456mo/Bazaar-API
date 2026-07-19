@@ -10,9 +10,6 @@ public record OrderRequest(
         @Valid
         List<OrderItemRequest> items,
 
-        @NotBlank(message = "User ID is required to place an order")
-        String userId,
-
         @NotBlank(message = "Payment method is required")
         String paymentMethod,
 
