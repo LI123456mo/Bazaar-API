@@ -1,6 +1,7 @@
 package com.conel.market.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -40,7 +41,6 @@ public class JwtService {
 
     @PostConstruct
     public void init() throws Exception {
-        // Safe execution: properties are fully injected by Spring before this runsc
         this.privateKey = KeyUtils.loadPrivateKey(privateKeyPath);
         this.publicKey = KeyUtils.loadPublicKey(publicKeyPath);
     }
@@ -66,10 +66,18 @@ public class JwtService {
                 .signWith(this.privateKey)
                 .compact();//header.payload.signature
     }
-    
-    public boolean isTokenValid(final String token,final String expectedUsername){
-        final String username=extractUsername(token);
-        return username.equals(expectedUsername) && !isTokenExpired(token);
+
+    public boolean isTokenValid(final String token, final UserDetails userDetails) {
+        try {
+            final Claims claims = extractClaims(token);
+            final String username = claims.getSubject();
+
+            return username.equals(userDetails.getUsername()) && !claims.getExpiration().before(new Date());
+        } catch (ExpiredJwtException e) {
+            return false;
+        } catch (JwtException e) {
+            return false;
+        }
     }
 
     public String extractUsername(String token) {

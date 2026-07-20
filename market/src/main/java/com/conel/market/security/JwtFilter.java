@@ -52,7 +52,7 @@ public class JwtFilter extends OncePerRequestFilter {
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 final UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-                if (this.jwtService.isTokenValid(jwt, userDetails.getUsername())) {
+                if (this.jwtService.isTokenValid(jwt, userDetails)) {
                     //This constructor should only be used by
                     //AuthenticationManager or AuthenticationProvider implementations
                     //that are satisfied with producing a trusted
