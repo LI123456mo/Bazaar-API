@@ -1,4 +1,4 @@
-package com.conel.market.service.email;
+package com.conel.market.emailVerification;
 
 import com.conel.market.exception.BusinessException;
 import com.conel.market.exception.ErrorCode;
@@ -52,12 +52,23 @@ public class EmailService {
             mailSender.send(message);
 
             log.info("Verification email sent successfully to: {}", toEmail);
-        } catch (MailException | MessagingException e) {
+        }catch (Exception e) {
+            log.warn("SMTP Server connection failed. Falling back to console logging for local development.");
+
+            log.info("\n=========================================================\n" +
+                    "DEVELOPMENT MOCK EMAIL TRANSCRIPT\n" +
+                    "To: {}\n" +
+                    "Subject: Verify Your Bazaar Account Email\n" +
+                    "Click here to verify: {}\n" +
+                    "=========================================================", toEmail, verificationUrl);
+        }
+
+        /*catch (MailException | MessagingException e) {
             log.error("Failed to send verification email to {}: {}", toEmail, e.getMessage(), e);
             throw new BusinessException(ErrorCode.ERR_SENDING_ACTIVATION_EMAIL);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
-        }
+        }*/
     }
 
     /**

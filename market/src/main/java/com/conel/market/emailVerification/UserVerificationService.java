@@ -1,12 +1,10 @@
-package com.conel.market.service.verification;
+package com.conel.market.emailVerification;
 
 import com.conel.market.user.entity.User;
 import com.conel.market.exception.BusinessException;
 import com.conel.market.exception.ErrorCode;
 import com.conel.market.entity.verification.VerificationToken;
-import com.conel.market.repository.verification.VerificationTokenRepository;
 import com.conel.market.user.repository.UserRepository;
-import com.conel.market.service.email.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;

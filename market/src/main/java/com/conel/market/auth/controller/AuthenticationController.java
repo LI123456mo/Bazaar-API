@@ -6,7 +6,7 @@ import com.conel.market.auth.dto.request.AuthenticationRequest;
 import com.conel.market.auth.dto.request.RefreshRequest;
 import com.conel.market.auth.dto.request.RegistrationRequest;
 import com.conel.market.auth.dto.response.AuthenticationResponse;
-import com.conel.market.service.verification.UserVerificationService;
+import com.conel.market.emailVerification.UserVerificationService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -6,7 +6,7 @@ import com.conel.market.auth.dto.request.RegistrationRequest;
 import com.conel.market.auth.dto.response.AuthenticationResponse;
 import com.conel.market.exception.BusinessException;
 import com.conel.market.exception.ErrorCode;
-import com.conel.market.service.verification.UserVerificationService;
+import com.conel.market.emailVerification.UserVerificationService;
 import com.conel.market.entity.vendor.VendorStatus;
 import com.conel.market.security.JwtService;
 import com.conel.market.user.mapper.UserMapper;

@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -21,17 +22,27 @@ import java.util.function.Function;
 @Service
 public class JwtService {
     public static final String TOKEN_TYPE = "token_type";
-    private final PrivateKey privateKey;
-    private final PublicKey publicKey;
+
+    private PrivateKey privateKey;
+    private PublicKey publicKey;
 
     @Value("${app.security.jwt.access-token-expiration}")
     private long accessTokenExpiration;
+
     @Value("${app.security.jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;
 
-    public JwtService() throws Exception {
-        this.privateKey = KeyUtils.loadPrivateKey("keys/local-only/private_key.pem");
-        this.publicKey = KeyUtils.loadPublicKey("keys/local-only/public_key.pem");
+    @Value("${app.security.jwt.private-key-path:keys/local-only/private_key.pem}")
+    private String privateKeyPath;
+
+    @Value("${app.security.jwt.public-key-path:keys/local-only/public_key.pem}")
+    private String publicKeyPath;
+
+    @PostConstruct
+    public void init() throws Exception {
+        // Safe execution: properties are fully injected by Spring before this runsc
+        this.privateKey = KeyUtils.loadPrivateKey(privateKeyPath);
+        this.publicKey = KeyUtils.loadPublicKey(publicKeyPath);
     }
 
     public String generateAccessToken(final String username){

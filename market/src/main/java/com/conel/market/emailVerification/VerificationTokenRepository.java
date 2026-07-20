@@ -1,4 +1,4 @@
-package com.conel.market.repository.verification;
+package com.conel.market.emailVerification;
 
 import com.conel.market.entity.verification.VerificationToken;
 import org.springframework.data.jpa.repository.JpaRepository;

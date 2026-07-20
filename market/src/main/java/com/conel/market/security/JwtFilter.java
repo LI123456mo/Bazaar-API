@@ -26,6 +26,10 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
 
+
+
+    //HttpServletRequest && HttpServletResponse => In Java Spring Boot, these two objects act as wrappers
+    // provided by the underlying web server (like Tomcat) to let the code read incoming data and construct outgoing responses
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (request.getServletPath().contains("/api/v1/auth")){
@@ -61,9 +65,9 @@ public class JwtFilter extends OncePerRequestFilter {
                     //Records the remote address and will also set the session Id if a session already exists (it won't create one).
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    log.debug("✓ JWT validated for user: {}", username);
+                    log.debug(" JWT validated for user: {}", username);
                 }else {
-                    log.warn("⚠ JWT token validation failed for user: {}", username);
+                    log.warn(" JWT token validation failed for user: {}", username);
                 }
             }
         }catch (Exception e){

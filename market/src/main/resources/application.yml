@@ -65,12 +65,12 @@ app:
 
   file-storage:
     upload-dir: ${FILE_UPLOAD_DIR:./uploads}
-    max-file-size: 10485760
+    max-file-size: ${MAX_FILE_SIZE:10485760}
 
   rag:
     project-root: ${RAG_PROJECT_ROOT:${user.dir}}
 
-  admin:                          # ← same level as security, email, file-storage
+  admin:
     email: ${ADMIN_EMAIL:admin@bazaar.local}
     password: ${ADMIN_PASSWORD:ChangeMe@123}
     phone: ${ADMIN_PHONE:0000000000}
