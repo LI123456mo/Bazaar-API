@@ -71,7 +71,7 @@ public class User implements UserDetails {
 
     @Column(nullable = true)
     @Builder.Default
-    private boolean vendorApproved=false;
+    private Boolean vendorApproved=false;
 
     public void softDelete() {
         String timestamp = String.valueOf(System.currentTimeMillis());

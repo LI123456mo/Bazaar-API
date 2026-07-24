@@ -12,6 +12,8 @@ public enum RoleEnum {
         add(PRODUCT_READ);
         add(ORDER_CREATE);
         add(ORDER_READ);
+        add(USER_READ);
+        add(USER_UPDATE);
     }}),
 
     VENDOR(new HashSet<>(){{
@@ -21,6 +23,7 @@ public enum RoleEnum {
         add(ORDER_READ);
         add(PRODUCT_DELETE);
         add(USER_READ);
+        add(USER_UPDATE);
     }}),
     ADMIN(new HashSet<>() {{
         add(PRODUCT_READ);

@@ -1,6 +1,7 @@
 package com.conel.market.user.dto.response;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 public record UserResponse(
         String id,
@@ -12,5 +13,6 @@ public record UserResponse(
         boolean emailVerified,
         boolean phoneVerified,
         boolean enabled,
-        String vendorStatus
+        String vendorStatus,
+        Set<String> roles
 ) {}

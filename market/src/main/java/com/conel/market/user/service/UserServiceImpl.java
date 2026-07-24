@@ -1,5 +1,6 @@
 package com.conel.market.user.service;
 
+import com.conel.market.user.dto.response.VendorResponse;
 import com.conel.market.user.entity.User;
 import com.conel.market.exception.BusinessException;
 import com.conel.market.exception.ErrorCode;
@@ -11,6 +12,8 @@ import com.conel.market.user.dto.request.UserProfileUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -111,4 +114,11 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.toUserResponse(savedUser);
     }
+
+    @Override
+    public Page<UserResponse> findAll(Pageable pageable) {
+        return userRepository.findAll(pageable)
+                .map(userMapper::toUserResponse);
+    }
+
 }

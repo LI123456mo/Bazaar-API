@@ -93,7 +93,7 @@ public class VendorServiceImpl implements VendorApprovalService {
                 user.getPhoneNumber(),
                 user.getDateOfBirth(),
                 user.getVendorStatus(),
-                user.isVendorApproved(),
+                user.getVendorApproved(),
                 user.getProducts().size()
         );
     }

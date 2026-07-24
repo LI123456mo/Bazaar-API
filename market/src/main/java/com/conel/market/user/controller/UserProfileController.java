@@ -1,5 +1,6 @@
 package com.conel.market.user.controller;
 
+import com.conel.market.dto.product.response.ProductResponse;
 import com.conel.market.user.entity.User;
 import com.conel.market.user.dto.response.UserResponse;
 import com.conel.market.user.service.UserService;
@@ -7,6 +8,9 @@ import com.conel.market.user.dto.request.ChangePasswordRequest;
 import com.conel.market.user.dto.request.UserProfileUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -72,5 +76,14 @@ public class UserProfileController {
     ){
         UserResponse updatedUser = userService.updateProfileInfo(request,authenticatedUser.getId());
         return ResponseEntity.ok(updatedUser);
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAuthority('user:manage')")
+    public ResponseEntity<Page<UserResponse>> findAllUsers(
+            @PageableDefault(size = 20, sort = "lastName") Pageable pageable
+    ){
+        Page<UserResponse> responses=userService.findAll(pageable);
+        return ResponseEntity.ok(responses);
     }
 }

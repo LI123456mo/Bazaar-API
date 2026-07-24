@@ -10,6 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class UserMapper {
@@ -58,7 +61,12 @@ public class UserMapper {
                 currentUser.isEnabled(),
                 currentUser.getVendorStatus() != null
                         ? currentUser.getVendorStatus().name()
-                        : null  // ← vendorStatus is String in DTO but VendorStatus enum on User
+                        : null , // ← vendorStatus is String in DTO but VendorStatus enum on User
+                currentUser.getRoles() != null
+                        ? currentUser.getRoles().stream()
+                          .map(role -> role.getName().toUpperCase())
+                          .collect(Collectors.toSet())
+                        : Set.of()
         );
     }
 }

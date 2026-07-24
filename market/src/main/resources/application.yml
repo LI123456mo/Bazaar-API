@@ -71,6 +71,6 @@ app:
     project-root: ${RAG_PROJECT_ROOT:${user.dir}}
 
   admin:
-    email: ${ADMIN_EMAIL:admin@bazaar.local}
-    password: ${ADMIN_PASSWORD:ChangeMe@123}
+    email: ${ADMIN_EMAIL:conellimo@gmail.com}
+    password: ${ADMIN_PASSWORD:conellimo}
     phone: ${ADMIN_PHONE:0000000000}
