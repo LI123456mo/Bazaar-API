@@ -59,7 +59,7 @@ public class AuthenticationController {
     }
 
 
-    @PostMapping("/verify-email")
+    @GetMapping("/verify-email")
     public ResponseEntity<Void> verifyEmail(@RequestParam @NotBlank String token) {
         userVerificationService.verifyEmail(token);
         return ResponseEntity.ok().build();
