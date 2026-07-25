@@ -96,6 +96,7 @@ public class AuthenticationController {
 
     // User forgot password → sends reset link to email
     @PostMapping("/forgot-password")
+    @Operation(summary = "Request password reset")
     public ResponseEntity<Void> forgotPassword(
             @RequestParam @NotBlank String email) {
         authenticationService.forgotPassword(email);
@@ -104,6 +105,7 @@ public class AuthenticationController {
 
     // User clicks link in email → sets new password
     @PostMapping("/reset-password")
+    @Operation(summary = "Reset password")
     public ResponseEntity<Void> resetPassword(
             @RequestParam @NotBlank String token,
             @RequestParam @NotBlank String newPassword) {
