@@ -1,5 +1,7 @@
 package com.conel.market.user.service;
 
+import com.conel.market.entity.role.Role;
+import com.conel.market.repository.role.RoleRepository;
 import com.conel.market.user.dto.response.VendorResponse;
 import com.conel.market.user.entity.User;
 import com.conel.market.exception.BusinessException;
@@ -20,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static com.conel.market.exception.ErrorCode.*;
 
 @Service
@@ -29,6 +33,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -49,8 +54,6 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.toUserResponse(savedUser);
     }
-
-
 
     @Override
     @Transactional
@@ -121,4 +124,17 @@ public class UserServiceImpl implements UserService {
                 .map(userMapper::toUserResponse);
     }
 
+    @Override
+    public void promoteToAdmin(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        Role adminRole = roleRepository.findByName("ADMIN")
+                .orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
+
+        user.setRoles(List.of(adminRole));
+        userRepository.save(user);
+
+        log.info("User {} promoted to ADMIN", user.getEmail());
+    }
 }

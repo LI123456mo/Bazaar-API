@@ -6,6 +6,7 @@ import com.conel.market.user.dto.response.UserResponse;
 import com.conel.market.user.service.UserService;
 import com.conel.market.user.dto.request.ChangePasswordRequest;
 import com.conel.market.user.dto.request.UserProfileUpdateRequest;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -85,5 +86,14 @@ public class UserProfileController {
     ){
         Page<UserResponse> responses=userService.findAll(pageable);
         return ResponseEntity.ok(responses);
+    }
+
+
+    @PostMapping("/{userId}/promote-to-admin")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @Operation(summary = "Promote user to Admin — SUPER_ADMIN only")
+    public ResponseEntity<Void> promoteToAdmin(@PathVariable String userId) {
+        userService.promoteToAdmin(userId);
+        return ResponseEntity.noContent().build();
     }
 }

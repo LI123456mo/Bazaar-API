@@ -34,6 +34,11 @@ public enum ErrorCode {
             "Account is already activated",
             HttpStatus.BAD_REQUEST),
 
+    //USER
+    ROLE_NOT_FOUND("ROLE_001",
+            "Role not found",
+            HttpStatus.NOT_FOUND),
+
     // PHONE
     PHONE_ALREADY_EXISTS("PHONE_001",
             "Phone number already exists",

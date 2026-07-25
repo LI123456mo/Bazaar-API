@@ -24,4 +24,6 @@ public interface UserService extends UserDetailsService {
     Page<UserResponse> findAll(Pageable pageable);
 
     UserResponse updateProfileInfo(UserProfileUpdateRequest request, String userId);
+
+    void promoteToAdmin(String userId);
 }
