@@ -4,42 +4,20 @@ spring:
 
   profiles:
     active: local
-  
+
   config:
     import: optional:file:.env[.properties]
-  
 
-  
-  # ADD FILE UPLOAD CONFIG
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
-  
-  # ADD JACKSON CONFIG
+
   jackson:
     serialization:
       write-dates-as-timestamps: false
     default-property-inclusion: non_null
 
-  # EMAIL CONFIGURATION — SMTP for sending emails
-  mail:
-    host: ${MAIL_HOST:smtp.gmail.com}          # Gmail, SendGrid, Mailgun, etc.
-    port: ${MAIL_PORT:587}                      # 587 for TLS, 465 for SSL
-    username: ${MAIL_USERNAME:your-email@gmail.com}
-    password: ${MAIL_PASSWORD:your-app-password}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
-
-# ADD LOGGING CONFIG
 logging:
   level:
     root: INFO
@@ -51,6 +29,7 @@ logging:
     name: logs/bazaar.log
     max-size: 10MB
     max-history: 30
+
 app:
   security:
     jwt:

@@ -7,6 +7,7 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -17,20 +18,22 @@ spring:
       hibernate:
         format_sql: true
 
-        #SMTP
   mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${GMAIL_USERNAME}
-    password: ${GMAIL_APP_PASSWORD}
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
-  #SPRING AI CONFIG
   ai:
     openai:
       api-key: ${GROG_API}
@@ -38,10 +41,7 @@ spring:
       chat:
         options:
           model: llama-3.1-8b-instant
-
-      # Keeps using Ollama JUST for embeddings (nomic-embed-text)
-      # Groq doesn't do embeddings, only chat
     ollama:
-      base-url: http://localhost:11434
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
       embedding:
         model: nomic-embed-text
