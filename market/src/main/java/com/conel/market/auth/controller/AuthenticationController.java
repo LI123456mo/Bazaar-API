@@ -86,7 +86,7 @@ public class AuthenticationController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/resend-verification")
+    /*@PostMapping("/resend-verification")
     @Operation(summary = "Resend verification email")
     public ResponseEntity<Void> resendVerification(
             @RequestParam @NotBlank String email) {
@@ -111,5 +111,5 @@ public class AuthenticationController {
             @RequestParam @NotBlank String newPassword) {
         authenticationService.resetPassword(token, newPassword);
         return ResponseEntity.ok().build();
-    }
+    }*/
 }

@@ -132,7 +132,8 @@ public class UserServiceImpl implements UserService {
         Role adminRole = roleRepository.findByName("ADMIN")
                 .orElseThrow(() -> new BusinessException(ErrorCode.ROLE_NOT_FOUND));
 
-        user.setRoles(List.of(adminRole));
+        user.getRoles().clear();
+        user.getRoles().add(adminRole);
         userRepository.save(user);
 
         log.info("User {} promoted to ADMIN", user.getEmail());
