@@ -60,6 +60,8 @@ public enum ErrorCode {
     PRODUCT_OUT_OF_STOCK("PRODUCT_005",
             "Product is out of stock or no longer available",
             HttpStatus.CONFLICT),
+    INVALID_STOCK_QUANTITY("PRODUCT_006","Stock quantity must be a positive number",
+            HttpStatus.BAD_REQUEST),
 
     // ORDERS
     ORDER_NOT_FOUND("ORDER_001",

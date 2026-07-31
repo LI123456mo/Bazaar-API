@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException; // ← FIXED IMPORT
 import org.springframework.validation.FieldError;
 import org.springframework.web.ErrorResponse;
@@ -146,5 +147,23 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ApiErrorResponse> handleOptimisticLock(
+            ObjectOptimisticLockingFailureException ex,
+            HttpServletRequest request) {
+
+        log.warn("Optimistic locking conflict: {}", ex.getMessage());
+
+        ApiErrorResponse response = ApiErrorResponse.builder()
+                .status(HttpStatus.CONFLICT.value())
+                .error(HttpStatus.CONFLICT.getReasonPhrase())
+                .message("This item was updated by someone else. Please refresh and try again.")
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 }

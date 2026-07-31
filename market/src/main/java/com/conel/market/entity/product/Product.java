@@ -31,8 +31,7 @@ public class Product extends BaseEntity {
     @Column(nullable = false)
     private Integer stockQuantity;
 
-    // Optimistic locking — prevents race condition when
-    // multiple customers buy the same product simultaneously
+    //Preventing lost updates in concurrent transactions
     @Version
     private Long version;
 

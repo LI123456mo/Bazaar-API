@@ -3,6 +3,7 @@ package com.conel.market.service.product;
 import com.conel.market.exception.BusinessException;
 import com.conel.market.exception.ErrorCode;
 import com.conel.market.entity.category.Category;
+import com.conel.market.file.FileStorageService;
 import com.conel.market.repository.category.CategoryRepository;
 import com.conel.market.entity.product.Product;
 import com.conel.market.mapper.ProductMapper;
@@ -38,6 +39,8 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final EntityManager entityManager;
 
+    private final FileStorageService fileStorageService;
+
     @Value("${app.file-storage.upload-dir:./uploads}")
     private String uploadDir;
 
@@ -50,12 +53,11 @@ public class ProductService {
         product.setSeller(seller);
 
         if (dto.categoryId() != null) {
-            Category category = categoryRepository.findById(dto.categoryId())
-                    .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + dto.categoryId()));
-            product.setCategory(category);
+            product.setCategory(getCategoryOrThrow(dto.categoryId()));
         }
 
         var savedProduct = productRepository.save(product);
+        log.info("Product '{}' (id={}) created by seller {}", savedProduct.getName(), savedProduct.getId(), userId);
         return productMapper.toProductResponseDto(savedProduct);
     }
 
@@ -70,11 +72,9 @@ public class ProductService {
             String oldFileName = existingProduct.getImageUrl();
             if (oldFileName != null) {
                 try {
-                    // Use the configured upload directory so cleanup stays aligned with storage and static serving.
-                    Path oldFilePath = Paths.get(uploadDir).resolve(oldFileName);
-                    Files.deleteIfExists(oldFilePath);
-                } catch (IOException e) {
-                    log.warn("Could not delete old file from file system: {}", e.getMessage());
+                    fileStorageService.deleteFile(oldFileName);
+                } catch (Exception e) {
+                    log.warn("Could not delete old image '{}' for product {}: {}", oldFileName, id, e.getMessage());
                 }
             }
             existingProduct.setImageUrl(newFileName);
@@ -87,21 +87,18 @@ public class ProductService {
 
         if (dto.categoryId() != null) {
             if (existingProduct.getCategory() == null || !dto.categoryId().equals(existingProduct.getCategory().getId())) {
-                Category newCategory = categoryRepository.findById(dto.categoryId())
-                        .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + dto.categoryId()));
-                existingProduct.setCategory(newCategory);
+                existingProduct.setCategory(getCategoryOrThrow(dto.categoryId()));
             }
         }
 
         Product savedProduct = productRepository.save(existingProduct);
+        log.info("Product {} updated by user {}", id, authenticatedUser.getId());
         return productMapper.toProductResponseDto(savedProduct);
     }
 
     @Transactional(readOnly = true)
     public ProductResponse findById(String id) {
-        return productRepository.findById(id)
-                .map(productMapper::toProductResponseDto)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
+        return productMapper.toProductResponseDto(getProductEntity(id));
     }
 
     @Transactional(readOnly = true)
@@ -115,18 +112,23 @@ public class ProductService {
 
     @Transactional
     public void decreaseStock(String productId, Integer quantity) {
-        Product product = getProductEntity(productId);
+        if (quantity==null || quantity<=0){
+            throw new BusinessException(ErrorCode.INVALID_STOCK_QUANTITY);
+        }
+        Product product = getProductEntityWithLock(productId);
 
         if (product.getStockQuantity() < quantity) {
-            throw new IllegalArgumentException("Not enough stock remaining for product: " + product.getName());
+            throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
         }
         product.setStockQuantity(product.getStockQuantity() - quantity);
-        productRepository.save(product);
     }
 
     @Transactional
     public ProductResponse increaseStock(String productId, Integer quantity) {
-        Product product = getProductEntity(productId);
+        if (quantity == null || quantity <= 0) {
+            throw new BusinessException(ErrorCode.INVALID_STOCK_QUANTITY);
+        }
+        Product product = getProductEntityWithLock(productId);
         product.setStockQuantity(product.getStockQuantity() + quantity);
         return productMapper.toProductResponseDto(productRepository.save(product));
     }
@@ -140,7 +142,13 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Product getProductEntity(String id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
+                .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+    }
+
+    @Transactional
+    public Product getProductEntityWithLock(String id) {
+        return productRepository.findByIdWithPessimisticLock(id)
+                .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
     }
 
     @Transactional(readOnly = true)
@@ -166,7 +174,7 @@ public class ProductService {
         Product product = getProductEntity(id);
         validateProductOwnership(product,authenticatedUser);
         product.setActive(false);
-        productRepository.save(product);
+        log.info("Product {} deactivated by user {}", id, authenticatedUser.getId());
     }
 
     @Transactional(readOnly = true)
@@ -177,8 +185,7 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductResponse getVendorProduct(String productId, String vendorId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
+        Product product = getProductEntity(productId);
 
         if (!product.getSeller().getId().equals(vendorId)) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
@@ -187,55 +194,6 @@ public class ProductService {
         return productMapper.toProductResponseDto(product);
     }
 
-    @Transactional
-    public ProductResponse updateVendorProduct(String productId, ProductRequest dto, String newFileName, User vendor) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-
-        validateProductOwnership(product, vendor);
-
-        if (newFileName != null) {
-            try {
-                if (product.getImageUrl() != null) {
-                    Path oldFilePath = Paths.get(uploadDir).resolve(product.getImageUrl());
-                    Files.deleteIfExists(oldFilePath);
-                }
-            } catch (IOException e) {
-                log.warn("Could not delete old file: {}", e.getMessage());
-            }
-            product.setImageUrl(newFileName);
-        }
-
-        product.setName(dto.name());
-        product.setDescription(dto.description());
-        product.setPrice(dto.price());
-        product.setStockQuantity(dto.stockQuantity());
-
-        if (dto.categoryId() != null) {
-            // Vendor edits should also be able to move a product between categories.
-            Category newCategory = categoryRepository.findById(dto.categoryId())
-                    .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + dto.categoryId()));
-            product.setCategory(newCategory);
-        }
-
-        return productMapper.toProductResponseDto(productRepository.save(product));
-    }
-
-    @Transactional
-    public void deleteVendorProduct(String productId, User vendor) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-
-        validateProductOwnership(product, vendor);
-        product.setActive(false);
-        productRepository.save(product);
-    }
-
-    @Transactional
-    public Product getProductEntityWithLock(String id) {
-        return productRepository.findByIdWithPessimisticLock(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found"));
-    }
 
     @Transactional
     public void saveProduct(Product product) {
@@ -243,8 +201,7 @@ public class ProductService {
     }
 
     /**
-     *  Helper method to enforce tenant isolation rules safely.
-     * Allows changes only if the user is the original listing seller OR has administrative rights.
+     * Enforces tenant isolation: only the original seller or an admin may mutate a product.
      */
     private void validateProductOwnership(Product product, User user) {
         if (user == null) {
@@ -259,5 +216,10 @@ public class ProductService {
         if (!isOwner && !isAdmin) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
+    }
+
+    private Category getCategoryOrThrow(String categoryId) {
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
     }
 }

@@ -7,7 +7,9 @@ import com.conel.market.dto.product.response.ProductResponse;
 import com.conel.market.user.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
+@Slf4j
 public class ProductController {
 
     private final ProductService productService;
@@ -32,12 +35,11 @@ public class ProductController {
     @PreAuthorize("hasAuthority('product:create')")
     public ResponseEntity<ProductResponse> createProduct(
             @Valid @RequestPart("product") ProductRequest request,
-            @RequestPart("file")MultipartFile file,
-            @AuthenticationPrincipal User authenticatedUser
-            ){
-        String filename=fileStorageService.saveFile(file);
+            @RequestPart("file") MultipartFile file,
+            @AuthenticationPrincipal User authenticatedUser) {
 
-        ProductResponse response=productService.saveProduct(request,filename, authenticatedUser.getId());
+        String filename = fileStorageService.saveFile(file);
+        ProductResponse response = productService.saveProduct(request, filename, authenticatedUser.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -47,20 +49,17 @@ public class ProductController {
     @PreAuthorize("hasAuthority('product:update')")
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable("id") String id,
-            @RequestPart("product") ProductRequest dto,
+            @Valid @RequestPart("product") ProductRequest dto,
             @RequestPart(value = "file", required = false) MultipartFile file,
             @AuthenticationPrincipal User authenticatedUser
     ) {
-        String fileName = null;
-        if (file != null && !file.isEmpty()) {
-            fileName = fileStorageService.saveFile(file);
-        }
-        ProductResponse response = productService.updateProduct(id, dto, fileName,authenticatedUser);
+        String fileName = (file != null && !file.isEmpty()) ? fileStorageService.saveFile(file) : null;
+        ProductResponse response = productService.updateProduct(id, dto, fileName, authenticatedUser);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('product:read')")
+    @PreAuthorize("permitAll()")
     public ResponseEntity<ProductResponse> findById(@PathVariable String id){
         ProductResponse response =productService.findById(id);
         return ResponseEntity.ok(response);
@@ -75,7 +74,9 @@ public class ProductController {
             @RequestParam(required = false) Double maxPrice,
             @RequestParam(required = false) String category,
             @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
-        Page<ProductResponse> products = productService.searchProducts(name, maxPrice, category, pageable);
+
+        Pageable safePageable = capPageSize(pageable, 100);
+        Page<ProductResponse> products = productService.searchProducts(name, maxPrice, category, safePageable);
         return ResponseEntity.ok(products);
     }
 
@@ -87,5 +88,10 @@ public class ProductController {
     ){
         productService.deleteProduct(id,authenticatedUser);
         return ResponseEntity.noContent().build();
+    }
+
+    private Pageable capPageSize(Pageable pageable, int max) {
+        int size = Math.min(pageable.getPageSize(), max);
+        return PageRequest.of(pageable.getPageNumber(), size, pageable.getSort());
     }
 }

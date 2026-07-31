@@ -55,18 +55,15 @@ public class VendorProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping("/{productId}")
+    @PutMapping(value = "/{productId}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @PreAuthorize("hasAuthority('product:update')")
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable String productId,
             @Valid @RequestPart("product") ProductRequest request,
             @RequestPart(value = "file", required = false) MultipartFile file,
             @AuthenticationPrincipal User authenticatedUser) {
-        String fileName = null;
-        if (file != null && !file.isEmpty()) {
-            fileName = fileStorageService.saveFile(file);
-        }
-        ProductResponse response = productService.updateVendorProduct(productId, request, fileName, authenticatedUser);
+        String fileName = (file != null && !file.isEmpty()) ? fileStorageService.saveFile(file) : null;
+        ProductResponse response = productService.updateProduct(productId, request, fileName, authenticatedUser);
         return ResponseEntity.ok(response);
     }
 
@@ -75,7 +72,7 @@ public class VendorProductController {
     public ResponseEntity<Void> deleteProduct(
             @PathVariable String productId,
             @AuthenticationPrincipal User authenticatedUser) {
-        productService.deleteVendorProduct(productId, authenticatedUser);
+        productService.deleteProduct(productId, authenticatedUser);
         return ResponseEntity.noContent().build();
     }
 }
