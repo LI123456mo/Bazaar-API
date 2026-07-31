@@ -30,7 +30,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth->auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/rag/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/categories", "/api/v1/categories/**","/api/v1/products","/api/v1/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/v1/categories", "/api/v1/categories/**","/api/v1/products","/api/v1/products/**","/api/v1/files/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -31,8 +31,6 @@ public class ProductController {
     private final ProductService productService;
     private final FileStorageService fileStorageService;
 
-
-
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @PreAuthorize("hasAuthority('product:create')")
     public ResponseEntity<ProductResponse> createProduct(
@@ -44,7 +42,6 @@ public class ProductController {
         ProductResponse response = productService.saveProduct(request, filename, authenticatedUser.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
-
 
 
     @PutMapping(value = "/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
@@ -66,8 +63,6 @@ public class ProductController {
         ProductResponse response =productService.findById(id);
         return ResponseEntity.ok(response);
     }
-
-
 
     @GetMapping
     @PreAuthorize("permitAll()")
