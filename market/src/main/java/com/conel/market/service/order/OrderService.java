@@ -63,18 +63,7 @@ public class OrderService {
         List<OrderItemResponse> responseItemsList = new ArrayList<>();
 
         for (OrderItemRequest itemDto : request.items()) {
-            Product lockedProduct = productService.getProductEntityWithLock(itemDto.productId());
-
-            if (!lockedProduct.isActive()) {
-                throw new BusinessException(ErrorCode.PRODUCT_ARCHIVED);
-            }
-            if (lockedProduct.getStockQuantity() < itemDto.quantity()) {
-                throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
-            }
-
-            lockedProduct.setStockQuantity(lockedProduct.getStockQuantity() - itemDto.quantity());
-            productService.persistProductEntity(lockedProduct);
-
+            Product lockedProduct = productService.decreaseStock(itemDto.productId(), itemDto.quantity());
             BigDecimal itemPriceAtPurchase = lockedProduct.getPrice();
 
             BigDecimal itemSubTotal = itemPriceAtPurchase.multiply(BigDecimal.valueOf(itemDto.quantity()));
@@ -96,7 +85,7 @@ public class OrderService {
                     itemPriceAtPurchase,
                     itemDto.quantity(),
                     itemSubTotal
-            )); // CHANGE: OrderItemResponse's price/subtotal fields must become BigDecimal too — see note below
+            ));
         }
 
         order.setTotalAmount(runningTotalAmount);

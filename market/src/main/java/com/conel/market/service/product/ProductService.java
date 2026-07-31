@@ -97,17 +97,22 @@ public class ProductService {
                 .toList();
     }
 
+
     @Transactional
-    public void decreaseStock(String productId, Integer quantity) {
+    public Product decreaseStock(String productId, Integer quantity) {
         if (quantity == null || quantity <= 0) {
             throw new BusinessException(ErrorCode.INVALID_STOCK_QUANTITY);
         }
         Product product = getProductEntityWithLock(productId);
 
+        if (!product.isActive()) {
+            throw new BusinessException(ErrorCode.PRODUCT_ARCHIVED);
+        }
         if (product.getStockQuantity() < quantity) {
             throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
         }
         product.setStockQuantity(product.getStockQuantity() - quantity);
+        return product;
     }
 
     @Transactional

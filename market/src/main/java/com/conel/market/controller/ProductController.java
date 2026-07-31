@@ -92,6 +92,15 @@ public class ProductController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{productId}/restock")
+    @PreAuthorize("hasAuthority('product:update')")
+    public ResponseEntity<ProductResponse> restock(
+            @PathVariable String productId,
+            @RequestParam Integer quantity,
+            @AuthenticationPrincipal User authenticatedUser) {
+        return ResponseEntity.ok(productService.increaseStock(productId, quantity));
+    }
+
     private Pageable capPageSize(Pageable pageable, int max) {
         int size = Math.min(pageable.getPageSize(), max);
         return PageRequest.of(pageable.getPageNumber(), size, pageable.getSort());
