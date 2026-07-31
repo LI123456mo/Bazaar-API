@@ -13,20 +13,15 @@ import com.conel.market.dto.product.response.ProductResponse;
 import com.conel.market.user.entity.User;
 import com.conel.market.specifications.ProductSpecification;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.math.BigDecimal; // CHANGE: added
 import java.util.List;
 
 @Service
@@ -38,18 +33,14 @@ public class ProductService {
     private final ProductMapper productMapper;
     private final CategoryRepository categoryRepository;
     private final EntityManager entityManager;
-
     private final FileStorageService fileStorageService;
-
-    @Value("${app.file-storage.upload-dir:./uploads}")
-    private String uploadDir;
 
     @Transactional
     public ProductResponse saveProduct(ProductRequest dto, String fileName, String userId) {
         var product = productMapper.toProduct(dto);
         product.setImageUrl(fileName);
 
-        User seller=entityManager.getReference(User.class,userId);
+        User seller = entityManager.getReference(User.class, userId);
         product.setSeller(seller);
 
         if (dto.categoryId() != null) {
@@ -64,8 +55,6 @@ public class ProductService {
     @Transactional
     public ProductResponse updateProduct(String id, ProductRequest dto, String newFileName, User authenticatedUser) {
         Product existingProduct = getProductEntity(id);
-
-        //  Multi-tenant security check. Prevents foreign seller modifications.
         validateProductOwnership(existingProduct, authenticatedUser);
 
         if (newFileName != null) {
@@ -85,10 +74,9 @@ public class ProductService {
         existingProduct.setPrice(dto.price());
         existingProduct.setStockQuantity(dto.stockQuantity());
 
-        if (dto.categoryId() != null) {
-            if (existingProduct.getCategory() == null || !dto.categoryId().equals(existingProduct.getCategory().getId())) {
-                existingProduct.setCategory(getCategoryOrThrow(dto.categoryId()));
-            }
+        if (dto.categoryId() != null
+                && (existingProduct.getCategory() == null || !dto.categoryId().equals(existingProduct.getCategory().getId()))) {
+            existingProduct.setCategory(getCategoryOrThrow(dto.categoryId()));
         }
 
         Product savedProduct = productRepository.save(existingProduct);
@@ -109,10 +97,9 @@ public class ProductService {
                 .toList();
     }
 
-
     @Transactional
     public void decreaseStock(String productId, Integer quantity) {
-        if (quantity==null || quantity<=0){
+        if (quantity == null || quantity <= 0) {
             throw new BusinessException(ErrorCode.INVALID_STOCK_QUANTITY);
         }
         Product product = getProductEntityWithLock(productId);
@@ -152,7 +139,7 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ProductResponse> searchProducts(String name, Double maxPrice, String category, Pageable pageable) {
+    public Page<ProductResponse> searchProducts(String name, BigDecimal maxPrice, String category, Pageable pageable) {
         Specification<Product> spec = Specification.where((root, query, cb) -> cb.equal(root.get("active"), true));
 
         if (name != null && !name.isEmpty()) {
@@ -161,7 +148,7 @@ public class ProductService {
         if (category != null && !category.isEmpty()) {
             spec = spec.and(ProductSpecification.hasCategoryName(category));
         }
-        if (maxPrice != null && maxPrice > 0) {
+        if (maxPrice != null && maxPrice.compareTo(BigDecimal.ZERO) > 0) {
             spec = spec.and(ProductSpecification.priceLessThan(maxPrice));
         }
 
@@ -170,9 +157,9 @@ public class ProductService {
     }
 
     @Transactional
-    public void deleteProduct(String id,User authenticatedUser) {
+    public void deleteProduct(String id, User authenticatedUser) {
         Product product = getProductEntity(id);
-        validateProductOwnership(product,authenticatedUser);
+        validateProductOwnership(product, authenticatedUser);
         product.setActive(false);
         log.info("Product {} deactivated by user {}", id, authenticatedUser.getId());
     }
@@ -186,33 +173,24 @@ public class ProductService {
     @Transactional(readOnly = true)
     public ProductResponse getVendorProduct(String productId, String vendorId) {
         Product product = getProductEntity(productId);
-
         if (!product.getSeller().getId().equals(vendorId)) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
-
         return productMapper.toProductResponseDto(product);
     }
 
-
     @Transactional
-    public void saveProduct(Product product) {
+    public void persistProductEntity(Product product) {
         productRepository.save(product);
     }
 
-    /**
-     * Enforces tenant isolation: only the original seller or an admin may mutate a product.
-     */
     private void validateProductOwnership(Product product, User user) {
         if (user == null) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
-
         boolean isAdmin = user.getAuthorities().stream()
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("admin:access"));
-
         boolean isOwner = product.getSeller() != null && product.getSeller().getId().equals(user.getId());
-
         if (!isOwner && !isAdmin) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }

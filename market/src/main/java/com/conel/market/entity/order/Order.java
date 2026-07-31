@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,8 +19,8 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 public class Order extends BaseEntity {
 
-    @Column(nullable = false)
-    private Double totalAmount;
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -25,8 +26,8 @@ public class Product extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
-    private Double price;
+    @Column(nullable = false, precision = 19, scale = 2)
+    private BigDecimal price;
 
     @Column(nullable = false)
     private Integer stockQuantity;

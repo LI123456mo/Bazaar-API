@@ -70,6 +70,7 @@ public enum ErrorCode {
     UNAUTHORIZED_ORDER_ACCESS("ORDER_002",
             "You do not have permission to view this order",
             HttpStatus.FORBIDDEN),
+    EMPTY_ORDER("ORDER_002","order required",HttpStatus.FORBIDDEN),
 
     //  VENDOR
     VENDOR_NOT_FOUND("VENDOR_001",

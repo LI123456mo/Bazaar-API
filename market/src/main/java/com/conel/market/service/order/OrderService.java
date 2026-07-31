@@ -14,10 +14,8 @@ import com.conel.market.entity.product.Product;
 import com.conel.market.service.product.ProductService;
 import com.conel.market.user.entity.User;
 import com.conel.market.user.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -25,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal; // CHANGE: added
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,112 +37,89 @@ public class OrderService {
     private final UserRepository userRepository;
 
     @Transactional
-    public OrderResponse placeOrder(OrderRequest request,String authenticatedUserId) {
-        try {
-            User buyer = userRepository.findById(authenticatedUserId)
-                    .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
+    public OrderResponse placeOrder(OrderRequest request, String authenticatedUserId) {
+        if (request.items() == null || request.items().isEmpty()) {
+            throw new BusinessException(ErrorCode.EMPTY_ORDER);
+        }
 
-            List<Product> products=new ArrayList<>();
+        User buyer = userRepository.findById(authenticatedUserId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-            for(OrderItemRequest itemDto:request.items()){
-                Product product=productService.getProductEntity(itemDto.productId());
+        Order order = Order.builder()
+                .status(OrderStatus.PENDING)
+                .paymentMethod(request.paymentMethod())
+                .shippingAddress(request.shippingAddress())
+                .user(buyer)
+                .buyerEmailSnapshot(buyer.getEmail())
+                .buyerNameSnapshot(buyer.getFirstName() + " " + buyer.getLastName())
+                .orderItems(new ArrayList<>())
+                .totalAmount(BigDecimal.ZERO)
+                .build();
 
-                if (!product.isActive()) {
-                    throw new BusinessException(ErrorCode.PRODUCT_ARCHIVED);
-                }
 
-                if (product.getStockQuantity() < itemDto.quantity()) {
-                    throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
-                }
+        // BigDecimal is immutable, so  can't do runningTotalAmount += x like a primitive —
+        // every operation returns a NEW BigDecimal that we reassign.
+        BigDecimal runningTotalAmount = BigDecimal.ZERO;
+        List<OrderItemResponse> responseItemsList = new ArrayList<>();
 
-                products.add(product);
+        for (OrderItemRequest itemDto : request.items()) {
+            Product lockedProduct = productService.getProductEntityWithLock(itemDto.productId());
+
+            if (!lockedProduct.isActive()) {
+                throw new BusinessException(ErrorCode.PRODUCT_ARCHIVED);
+            }
+            if (lockedProduct.getStockQuantity() < itemDto.quantity()) {
+                throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
             }
 
-            Order order = Order.builder()
-                    .status(OrderStatus.PENDING)
-                    .paymentMethod(request.paymentMethod())
-                    .shippingAddress(request.shippingAddress())
-                    .user(buyer)
-                    .buyerEmailSnapshot(buyer.getEmail())
-                    .buyerNameSnapshot(buyer.getFirstName()+" "+buyer.getLastName())
-                    .orderItems(new ArrayList<>())
-                    .totalAmount(0.0)
+            lockedProduct.setStockQuantity(lockedProduct.getStockQuantity() - itemDto.quantity());
+            productService.persistProductEntity(lockedProduct);
+
+            BigDecimal itemPriceAtPurchase = lockedProduct.getPrice();
+
+            BigDecimal itemSubTotal = itemPriceAtPurchase.multiply(BigDecimal.valueOf(itemDto.quantity()));
+
+            runningTotalAmount = runningTotalAmount.add(itemSubTotal);
+
+            OrderItem orderItem = OrderItem.builder()
+                    .order(order)
+                    .product(lockedProduct)
+                    .quantity(itemDto.quantity())
+                    .priceAtPurchase(itemPriceAtPurchase)
                     .build();
 
-            double runningTotalAmount = 0.0;
-            List<OrderItemResponse> responseItemsList = new ArrayList<>();
+            order.getOrderItems().add(orderItem);
 
-            int index=0;
-            for (OrderItemRequest itemDto : request.items()) {
-                Product product = products.get(index++);
-
-                Product lockeProduct=productService.getProductEntityWithLock(product.getId());
-
-                if (lockeProduct.getStockQuantity()<itemDto.quantity()){
-                    throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
-                }
-
-                lockeProduct.setStockQuantity(lockeProduct.getStockQuantity()- itemDto.quantity());
-                productService.saveProduct(lockeProduct);
-
-
-                double itemPriceAtPurchase = lockeProduct.getPrice();
-                double itemSubTotal = itemPriceAtPurchase * itemDto.quantity();
-                runningTotalAmount += itemSubTotal;
-
-                OrderItem orderItem = OrderItem.builder()
-                        .order(order)
-                        .product(lockeProduct)
-                        .quantity(itemDto.quantity())
-                        .priceAtPurchase(itemPriceAtPurchase)
-                        .build();
-
-                order.getOrderItems().add(orderItem);
-
-                responseItemsList.add(new OrderItemResponse(
-                        product.getId(),
-                        product.getName(),
-                        itemPriceAtPurchase,
-                        itemDto.quantity(),
-                        itemSubTotal
-                ));
-            }
-
-            order.setTotalAmount(runningTotalAmount);
-            Order savedOrder = orderRepository.save(order);
-
-            log.info("Order created: {} for user: {}", savedOrder.getId(), buyer.getEmail());
-
-            return new OrderResponse(
-                    savedOrder.getId(),
-                    savedOrder.getTotalAmount(),
-                    savedOrder.getStatus().name(),
-                    savedOrder.getPaymentMethod(),
-                    savedOrder.getShippingAddress(),
-                    responseItemsList
-            );
-        }catch (OptimisticLockingFailureException e) {
-            // Two people tried to buy the last item simultaneously
-            throw new BusinessException(ErrorCode.PRODUCT_OUT_OF_STOCK);
+            responseItemsList.add(new OrderItemResponse(
+                    lockedProduct.getId(),
+                    lockedProduct.getName(),
+                    itemPriceAtPurchase,
+                    itemDto.quantity(),
+                    itemSubTotal
+            )); // CHANGE: OrderItemResponse's price/subtotal fields must become BigDecimal too — see note below
         }
+
+        order.setTotalAmount(runningTotalAmount);
+        Order savedOrder = orderRepository.save(order);
+
+        log.info("Order created: {} for user: {}", savedOrder.getId(), buyer.getEmail());
+
+        return new OrderResponse(
+                savedOrder.getId(),
+                savedOrder.getTotalAmount(),
+                savedOrder.getStatus().name(),
+                savedOrder.getPaymentMethod(),
+                savedOrder.getShippingAddress(),
+                responseItemsList
+        );
     }
 
     @Transactional(readOnly = true)
-    public OrderResponse getOrderById(String orderId,String authenticatedUserId) {
+    public OrderResponse getOrderById(String orderId, String authenticatedUserId) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new EntityNotFoundException("Order not found with ID: " + orderId));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
-        validateOwnership(order,authenticatedUserId);
-
-        List<OrderItemResponse> itemResponses = order.getOrderItems().stream()
-                .map(item -> new OrderItemResponse(
-                        item.getProduct().getId(),
-                        item.getProduct().getName(),
-                        item.getPriceAtPurchase(),
-                        item.getQuantity(),
-                        item.getPriceAtPurchase() * item.getQuantity()
-                ))
-                .toList();
+        validateOwnership(order, authenticatedUserId);
 
         return new OrderResponse(
                 order.getId(),
@@ -151,54 +127,41 @@ public class OrderService {
                 order.getStatus().name(),
                 order.getPaymentMethod(),
                 order.getShippingAddress(),
-                itemResponses
+                toOrderItemResponses(order)
         );
     }
 
     @Transactional(readOnly = true)
     public Page<OrderResponse> getAllOrders(Pageable pageable) {
         return orderRepository.findAll(pageable)
-                .map(order -> {
-                    List<OrderItemResponse> itemResponses=order.getOrderItems().stream()
-                            .map(item->new OrderItemResponse(
-                                    item.getProduct().getId(),
-                                    item.getProduct().getName(),
-                                    item.getPriceAtPurchase(),
-                                    item.getQuantity(),
-                                    item.getPriceAtPurchase()* item.getQuantity()
-                            ))
-                            .toList();
-
-                    return new OrderResponse(
-                            order.getId(),
-                            order.getTotalAmount(),
-                            order.getStatus().name(),
-                            order.getPaymentMethod(),
-                            order.getShippingAddress(),
-                            itemResponses
-                    );
-                });
+                .map(order -> new OrderResponse(
+                        order.getId(),
+                        order.getTotalAmount(),
+                        order.getStatus().name(),
+                        order.getPaymentMethod(),
+                        order.getShippingAddress(),
+                        toOrderItemResponses(order)
+                ));
     }
 
+    private List<OrderItemResponse> toOrderItemResponses(Order order) {
+        return order.getOrderItems().stream()
+                .map(item -> new OrderItemResponse(
+                        item.getProduct().getId(),
+                        item.getProduct().getName(),
+                        item.getPriceAtPurchase(),
+                        item.getQuantity(),
+                        item.getPriceAtPurchase().multiply(BigDecimal.valueOf(item.getQuantity()))
+                ))
+                .toList();
+    }
 
-    /**
-     * Validate that the currently authenticated user is allowed to view this order.
-     * Allows access if:
-     *  - the order belongs to the authenticated user
-     *  - OR the current authentication has authority "order:read_all" (admin override)
-     *
-     * Throws BusinessException(ErrorCode.ACCESS_DENIED) if not allowed.
-     */
-    public void validateOwnership(Order order,String authenticatedUserId){
-        // Check for admin-level authority
+    public void validateOwnership(Order order, String authenticatedUserId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(a -> "order:read_all".equals(a.getAuthority()))) {
-            // Has admin-level permission to read any order
             return;
         }
-
-        // Otherwise require that the owner matches
         if (!order.getUser().getId().equals(authenticatedUserId)) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }

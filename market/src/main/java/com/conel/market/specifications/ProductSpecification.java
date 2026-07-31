@@ -4,13 +4,15 @@ import com.conel.market.entity.product.Product;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.math.BigDecimal;
+
 public class ProductSpecification {
-    public static Specification<Product> priceLessThan(Double maxPrice){
+    public static Specification<Product> priceLessThan(BigDecimal maxPrice){
         return (Root<Product> root,
                 CriteriaQuery<?> query,
                 CriteriaBuilder builder
         )->{
-            if (maxPrice==null || maxPrice<=0)return null;
+            if (maxPrice==null || maxPrice.compareTo(BigDecimal.ZERO) <= 0)return null;
             return builder.lessThanOrEqualTo(root.get("price"),maxPrice);
         };
     }

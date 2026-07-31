@@ -20,6 +20,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
+
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
@@ -71,7 +73,7 @@ public class ProductController {
     @PreAuthorize("permitAll()")
     public ResponseEntity<Page<ProductResponse>> searchProducts(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) String category,
             @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
 

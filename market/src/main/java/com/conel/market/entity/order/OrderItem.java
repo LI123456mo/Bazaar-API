@@ -9,6 +9,8 @@ import jakarta.persistence.ManyToOne;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.math.BigDecimal;
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
@@ -19,7 +21,7 @@ public class OrderItem extends BaseEntity {
 
     private Integer quantity;
 
-    private Double priceAtPurchase;
+    private BigDecimal priceAtPurchase;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "order_id")

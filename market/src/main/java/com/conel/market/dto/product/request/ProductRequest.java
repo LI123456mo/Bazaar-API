@@ -2,6 +2,8 @@ package com.conel.market.dto.product.request;
 
 import jakarta.validation.constraints.*;
 
+import java.math.BigDecimal;
+
 public record ProductRequest(
         @NotBlank(message = "Product name is required")
         @Size(min = 3, max = 100, message = "Product name must be between 3 and 100 characters")
@@ -14,7 +16,7 @@ public record ProductRequest(
         @NotNull(message = "Price is required")
         @DecimalMin(value = "0.01", message = "Price must be greater than 0")
         @DecimalMax(value = "999999.99", message = "Price cannot exceed 999,999.99")
-        Double price,
+        BigDecimal price,
 
         @NotNull(message = "Stock quantity is required")
         @Min(value = 0, message = "Stock cannot be negative")

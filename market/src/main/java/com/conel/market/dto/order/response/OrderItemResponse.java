@@ -1,9 +1,11 @@
 package com.conel.market.dto.order.response;
 
+import java.math.BigDecimal;
+
 public record OrderItemResponse(
         String productId,
         String productName,
-        Double priceAtPurchase,
+        BigDecimal priceAtPurchase,
         Integer quantity,
-        Double subTotal
+        BigDecimal subTotal
 ) {}
