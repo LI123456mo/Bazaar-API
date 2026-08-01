@@ -4,8 +4,10 @@ package com.conel.market.auth.controller;
 import com.conel.market.auth.services.AuthenticationService;
 import com.conel.market.auth.dto.request.AuthenticationRequest;
 import com.conel.market.auth.dto.request.RefreshRequest;
+import com.conel.market.auth.dto.request.PasswordResetRequest;
 import com.conel.market.auth.dto.request.RegistrationRequest;
 import com.conel.market.auth.dto.response.AuthenticationResponse;
+import com.conel.market.emailVerification.PasswordResetService;
 import com.conel.market.emailVerification.UserVerificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,6 +27,7 @@ import jakarta.validation.constraints.NotBlank;
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private  final UserVerificationService userVerificationService;
+    private final PasswordResetService passwordResetService;
 
     @PostMapping("/login")
     @Operation(
@@ -86,30 +89,41 @@ public class AuthenticationController {
         return ResponseEntity.ok().build();
     }
 
-    /*@PostMapping("/resend-verification")
-    @Operation(summary = "Resend verification email")
+    // Public recovery endpoints stay unauthenticated so the API never leaks whether an email address already exists.
+    @PostMapping("/resend-verification")
+    @Operation(
+            summary = "Resend Verification Email",
+            description = "Send a fresh verification email to an account that has not yet been activated"
+    )
     public ResponseEntity<Void> resendVerification(
             @RequestParam @NotBlank String email) {
         userVerificationService.resendVerificationEmail(email);
         return ResponseEntity.ok().build();
     }
 
-    // User forgot password → sends reset link to email
     @PostMapping("/forgot-password")
-    @Operation(summary = "Request password reset")
+    @Operation(
+            summary = "Forgot Password",
+            description = "Send a password reset link without revealing whether the email address is registered"
+    )
     public ResponseEntity<Void> forgotPassword(
-            @RequestParam @NotBlank String email) {
-        authenticationService.forgotPassword(email);
+            @RequestParam @NotBlank String email
+    ) {
+        passwordResetService.forgotPassword(email);
         return ResponseEntity.ok().build();
     }
 
-    // User clicks link in email → sets new password
     @PostMapping("/reset-password")
-    @Operation(summary = "Reset password")
+    @Operation(
+            summary = "Reset Password",
+            description = "Complete a password reset using the token from the recovery email"
+    )
     public ResponseEntity<Void> resetPassword(
             @RequestParam @NotBlank String token,
-            @RequestParam @NotBlank String newPassword) {
-        authenticationService.resetPassword(token, newPassword);
+            @Valid
+            @RequestBody
+            PasswordResetRequest request) {
+        passwordResetService.resetPassword(token, request.getNewPassword(), request.getConfirmPassword());
         return ResponseEntity.ok().build();
-    }*/
+    }
 }

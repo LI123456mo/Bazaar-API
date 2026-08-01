@@ -53,6 +53,19 @@ public class UserVerificationService {
         log.info("Verification email sent to {}", user.getEmail());
     }
 
+    @Transactional
+    public void resendVerificationEmail(String email) {
+        User user = userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.isEmailVerified()) {
+            throw new BusinessException(ErrorCode.ACCOUNT_ALREADY_ACTIVATED);
+        }
+        sendVerificationEmail(user);
+
+        log.info("Verification email resent to {}", user.getEmail());
+    }
+
 
     @Transactional
     public void verifyEmail(String token) {

@@ -1,93 +1,36 @@
-2026-07-31 08:32:22 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=6h29m8s733ms214µs100ns).
-2026-07-31 10:30:42 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
-2026-07-31 10:30:42 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
-2026-07-31 10:30:42 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
-2026-07-31 10:31:00 [main] INFO  c.conel.market.LimoMarketApplication - Starting LimoMarketApplication using Java 17.0.19 with PID 32308 (C:\Users\hp\market\Bazaar-API\market\target\classes started by hp in C:\Users\hp\market\Bazaar-API\market)
-2026-07-31 10:31:00 [main] DEBUG c.conel.market.LimoMarketApplication - Running with Spring Boot v3.3.5, Spring v6.1.14
-2026-07-31 10:31:00 [main] INFO  c.conel.market.LimoMarketApplication - The following 1 profile is active: "local"
-2026-07-31 10:31:01 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-07-31 10:31:02 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 293 ms. Found 8 JPA repository interfaces.
-2026-07-31 10:31:03 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
-2026-07-31 10:31:03 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
-2026-07-31 10:31:03 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.31]
-2026-07-31 10:31:03 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
-2026-07-31 10:31:03 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 3059 ms
-2026-07-31 10:31:03 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-07-31 10:31:03 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.3.Final
-2026-07-31 10:31:03 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
-2026-07-31 10:31:04 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-07-31 10:31:04 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
-2026-07-31 10:31:04 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@6d7556a8
-2026-07-31 10:31:04 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
-2026-07-31 10:31:04 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-07-31 10:31:06 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-07-31 10:31:06 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-07-31 10:31:07 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-07-31 10:31:07 [main] DEBUG com.conel.market.security.JwtFilter - Filter 'jwtFilter' configured for use
-2026-07-31 10:31:07 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer - Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
-2026-07-31 10:31:07 [main] WARN  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
-2026-07-31 10:31:08 [main] INFO  c.c.m.file.LocalFileStorageService - File storage initialized at: C:\Users\hp\market\Bazaar-API\market\uploads
-2026-07-31 10:31:09 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2026-07-31 10:31:10 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
-2026-07-31 10:31:10 [main] INFO  c.conel.market.LimoMarketApplication - Started LimoMarketApplication in 10.752 seconds (process running for 25.012)
-2026-07-31 10:31:10 [main] INFO  com.conel.market.config.RoleSeeder - Starting data seeding...
-2026-07-31 10:31:10 [main] DEBUG com.conel.market.config.RoleSeeder - CUSTOMER role already exists
-2026-07-31 10:31:10 [main] DEBUG com.conel.market.config.RoleSeeder - VENDOR role already exists
-2026-07-31 10:31:10 [main] DEBUG com.conel.market.config.RoleSeeder - ADMIN role already exists
-2026-07-31 10:31:10 [main] DEBUG com.conel.market.config.RoleSeeder - SUPER_ADMIN role already exists
-2026-07-31 10:31:10 [main] DEBUG com.conel.market.config.RoleSeeder - Super admin user already exists
-2026-07-31 10:31:10 [main] INFO  com.conel.market.config.RoleSeeder - Data seeding completed
-2026-07-31 10:34:46 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-07-31 10:34:46 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
-2026-07-31 10:34:46 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 1 ms
-2026-07-31 10:34:46 [http-nio-8080-exec-1] DEBUG com.conel.market.security.JwtFilter -  JWT validated for user: conellimo@gmail.com
-2026-07-31 10:34:46 [http-nio-8080-exec-1] WARN  o.s.d.w.c.SpringDataJacksonConfiguration$PageModule$WarningLoggingModifier - Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
-	For a stable JSON structure, please use Spring Data's PagedModel (globally via @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO))
-	or Spring HATEOAS and Spring Data's PagedResourcesAssembler as documented in https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html#core.web.pageables.
-
-2026-07-31 13:52:08 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
-2026-07-31 13:52:08 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
-2026-07-31 13:52:08 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
-2026-07-31 13:53:04 [main] INFO  c.conel.market.LimoMarketApplication - Starting LimoMarketApplication using Java 17.0.19 with PID 27820 (C:\Users\hp\market\Bazaar-API\market\target\classes started by hp in C:\Users\hp\market\Bazaar-API\market)
-2026-07-31 13:53:04 [main] DEBUG c.conel.market.LimoMarketApplication - Running with Spring Boot v3.3.5, Spring v6.1.14
-2026-07-31 13:53:04 [main] INFO  c.conel.market.LimoMarketApplication - The following 1 profile is active: "local"
-2026-07-31 13:53:05 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2026-07-31 13:53:06 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 233 ms. Found 8 JPA repository interfaces.
-2026-07-31 13:53:06 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
-2026-07-31 13:53:06 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
-2026-07-31 13:53:06 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.31]
-2026-07-31 13:53:06 [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
-2026-07-31 13:53:06 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2254 ms
-2026-07-31 13:53:07 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
-2026-07-31 13:53:07 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.3.Final
-2026-07-31 13:53:07 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
-2026-07-31 13:53:07 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
-2026-07-31 13:53:07 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
-2026-07-31 13:53:07 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@17a7d6c8
-2026-07-31 13:53:07 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
-2026-07-31 13:53:07 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2026-07-31 13:53:09 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-2026-07-31 13:53:09 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
-2026-07-31 13:53:09 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
-2026-07-31 13:53:10 [main] DEBUG com.conel.market.security.JwtFilter - Filter 'jwtFilter' configured for use
-2026-07-31 13:53:10 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer - Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
-2026-07-31 13:53:10 [main] WARN  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
-2026-07-31 13:53:10 [main] INFO  c.c.m.file.LocalFileStorageService - File storage initialized at: C:\Users\hp\market\Bazaar-API\market\uploads
-2026-07-31 13:53:11 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2026-07-31 13:53:11 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/'
-2026-07-31 13:53:11 [main] INFO  c.conel.market.LimoMarketApplication - Started LimoMarketApplication in 7.842 seconds (process running for 9.765)
-2026-07-31 13:53:11 [main] INFO  com.conel.market.config.RoleSeeder - Starting data seeding...
-2026-07-31 13:53:12 [main] DEBUG com.conel.market.config.RoleSeeder - CUSTOMER role already exists
-2026-07-31 13:53:12 [main] DEBUG com.conel.market.config.RoleSeeder - VENDOR role already exists
-2026-07-31 13:53:12 [main] DEBUG com.conel.market.config.RoleSeeder - ADMIN role already exists
-2026-07-31 13:53:12 [main] DEBUG com.conel.market.config.RoleSeeder - SUPER_ADMIN role already exists
-2026-07-31 13:53:12 [main] DEBUG com.conel.market.config.RoleSeeder - Super admin user already exists
-2026-07-31 13:53:12 [main] INFO  com.conel.market.config.RoleSeeder - Data seeding completed
-2026-07-31 13:54:11 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-07-31 13:54:11 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
-2026-07-31 13:54:11 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 5 ms
-2026-07-31 14:06:51 [http-nio-8080-exec-5] DEBUG com.conel.market.security.JwtFilter -  JWT validated for user: conellimo@gmail.com
-2026-07-31 14:06:51 [http-nio-8080-exec-5] WARN  o.s.d.w.c.SpringDataJacksonConfiguration$PageModule$WarningLoggingModifier - Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
-	For a stable JSON structure, please use Spring Data's PagedModel (globally via @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO))
-	or Spring HATEOAS and Spring Data's PagedResourcesAssembler as documented in https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html#core.web.pageables.
-
+2026-08-01 00:21:51 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01 00:21:51 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-08-01 00:21:51 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2026-08-01 10:01:57 [main] INFO  c.c.m.LimoMarketApplicationTests - Starting LimoMarketApplicationTests using Java 21.0.10 with PID 30448 (started by hp in C:\Users\hp\market\Bazaar-API\market)
+2026-08-01 10:01:57 [main] DEBUG c.c.m.LimoMarketApplicationTests - Running with Spring Boot v3.3.5, Spring v6.1.14
+2026-08-01 10:01:57 [main] INFO  c.c.m.LimoMarketApplicationTests - The following 1 profile is active: "local"
+2026-08-01 10:02:00 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-01 10:02:01 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 549 ms. Found 9 JPA repository interfaces.
+2026-08-01 10:02:03 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-01 10:02:04 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.5.3.Final
+2026-08-01 10:02:04 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2026-08-01 10:02:04 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-01 10:02:04 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-08-01 10:02:05 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@1b10f60e
+2026-08-01 10:02:05 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2026-08-01 10:02:05 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-01 10:02:08 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-01 10:02:09 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Warning Code: 0, SQLState: 00000
+2026-08-01 10:02:09 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - constraint "uk71lqwbwtklmljk3qlsugr1mig" of relation "password_reset_tokens" does not exist, skipping
+2026-08-01 10:02:09 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01 10:02:10 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-01 10:02:11 [main] INFO  o.s.s.c.a.a.c.InitializeAuthenticationProviderBeanManagerConfigurer$InitializeAuthenticationProviderManagerConfigurer - Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2026-08-01 10:02:11 [main] WARN  o.s.s.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigurer - Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used for username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider.
+2026-08-01 10:02:12 [main] INFO  c.c.m.file.LocalFileStorageService - File storage initialized at: C:\Users\hp\market\Bazaar-API\market\uploads
+2026-08-01 10:02:15 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-01 10:02:18 [main] INFO  c.c.m.LimoMarketApplicationTests - Started LimoMarketApplicationTests in 21.652 seconds (process running for 24.154)
+2026-08-01 10:02:18 [main] INFO  com.conel.market.config.RoleSeeder - Starting data seeding...
+2026-08-01 10:02:18 [main] DEBUG com.conel.market.config.RoleSeeder - CUSTOMER role already exists
+2026-08-01 10:02:18 [main] DEBUG com.conel.market.config.RoleSeeder - VENDOR role already exists
+2026-08-01 10:02:18 [main] DEBUG com.conel.market.config.RoleSeeder - ADMIN role already exists
+2026-08-01 10:02:18 [main] DEBUG com.conel.market.config.RoleSeeder - SUPER_ADMIN role already exists
+2026-08-01 10:02:18 [main] DEBUG com.conel.market.config.RoleSeeder - Super admin user already exists
+2026-08-01 10:02:18 [main] INFO  com.conel.market.config.RoleSeeder - Data seeding completed
+2026-08-01 10:02:19 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-08-01 10:02:19 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
+2026-08-01 10:02:19 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.

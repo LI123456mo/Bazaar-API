@@ -50,6 +50,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         final User user=(User) auth.getPrincipal();
         assert user != null;
+        // This check happens only after credential validation so the API does not reveal whether an email exists before authentication succeeds.
+        if (!user.isEmailVerified()) {
+            log.warn("Blocked login for unverified account: {}", user.getEmail());
+            throw new BusinessException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
         final String token=this.jwtService.generateAccessToken(user.getUsername());
         final String refreshToken=this.jwtService.generateRefreshToken(user.getUsername());
         final String tokenType="Bearer";

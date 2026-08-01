@@ -96,6 +96,18 @@ public enum ErrorCode {
     ACCESS_DENIED("AUTH_005",           // ← fixed: was AUTH_004 (duplicate)
             "You do not have permission to perform this action",
             HttpStatus.FORBIDDEN),
+    EMAIL_NOT_VERIFIED("AUTH_006",
+            "Please verify your email before logging in",
+            HttpStatus.FORBIDDEN),
+    PASSWORD_RESET_TOKEN_INVALID("AUTH_007",
+            "Invalid reset token",
+            HttpStatus.BAD_REQUEST),
+    PASSWORD_RESET_TOKEN_EXPIRED("AUTH_008",
+            "Password reset token has expired",
+            HttpStatus.BAD_REQUEST),
+    PASSWORD_RESET_TOKEN_USED("AUTH_009",
+            "This password reset token has already been used",
+            HttpStatus.BAD_REQUEST),
 
     // CATEGORIES
     CATEGORY_NOT_FOUND("CATEGORY_001",
