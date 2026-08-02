@@ -1,4 +1,4 @@
-package com.conel.market.models.cart;
+package com.conel.market.cart;
 
 import com.conel.market.entity.BaseEntity;
 import com.conel.market.entity.product.Product;

@@ -1,4 +1,4 @@
-package com.conel.market.models.cart.dto;
+package com.conel.market.cart.dto;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

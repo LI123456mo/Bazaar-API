@@ -1,11 +1,11 @@
-package com.conel.market.models.cart;
+package com.conel.market.cart;
 
 import com.conel.market.exception.BusinessException;
 import com.conel.market.exception.ErrorCode;
 import com.conel.market.entity.product.Product;
-import com.conel.market.models.cart.dto.AddToCartRequest;
-import com.conel.market.models.cart.dto.CartResponse;
-import com.conel.market.models.cart.dto.UpdateCartItemRequest;
+import com.conel.market.cart.dto.AddToCartRequest;
+import com.conel.market.cart.dto.CartResponse;
+import com.conel.market.cart.dto.UpdateCartItemRequest;
 import com.conel.market.repository.product.ProductRepository;
 import com.conel.market.user.entity.User;
 import com.conel.market.user.repository.UserRepository;

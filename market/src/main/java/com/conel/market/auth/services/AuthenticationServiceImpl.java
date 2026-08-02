@@ -4,6 +4,8 @@ import com.conel.market.auth.dto.request.AuthenticationRequest;
 import com.conel.market.auth.dto.request.RefreshRequest;
 import com.conel.market.auth.dto.request.RegistrationRequest;
 import com.conel.market.auth.dto.response.AuthenticationResponse;
+import com.conel.market.cart.CartService;
+import com.conel.market.cart.GuestTokenService;
 import com.conel.market.exception.BusinessException;
 import com.conel.market.exception.ErrorCode;
 import com.conel.market.emailVerification.UserVerificationService;
@@ -15,6 +17,8 @@ import com.conel.market.user.entity.User;
 import com.conel.market.repository.role.RoleRepository;
 import com.conel.market.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,9 +42,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final UserVerificationService userVerificationService;
+    private final CartService cartService;             // CHANGE: added
+    private final GuestTokenService guestTokenService;
 
     @Override
-    public AuthenticationResponse login(AuthenticationRequest request) {
+    public AuthenticationResponse login(AuthenticationRequest request, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
         final Authentication auth=authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -55,6 +61,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             log.warn("Blocked login for unverified account: {}", user.getEmail());
             throw new BusinessException(ErrorCode.EMAIL_NOT_VERIFIED);
         }
+
+        String guestToken = guestTokenService.readToken(httpRequest);
+        if (guestToken!=null){
+            try {
+                cartService.mergeGuestCartIntoUser(guestToken, user.getId());
+            } catch (Exception e) {
+                log.warn("Guest cart merge failed for user {}: {}", user.getEmail(), e.getMessage());
+            } finally {
+                guestTokenService.clearToken(httpResponse);
+            }
+        }
+
         final String token=this.jwtService.generateAccessToken(user.getUsername());
         final String refreshToken=this.jwtService.generateRefreshToken(user.getUsername());
         final String tokenType="Bearer";

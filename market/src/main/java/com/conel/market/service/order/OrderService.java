@@ -11,7 +11,7 @@ import com.conel.market.dto.order.request.OrderItemRequest;
 import com.conel.market.dto.order.response.OrderItemResponse;
 import com.conel.market.dto.order.response.OrderResponse;
 import com.conel.market.entity.product.Product;
-import com.conel.market.models.cart.CartService;
+import com.conel.market.cart.CartService;
 import com.conel.market.service.product.ProductService;
 import com.conel.market.user.entity.User;
 import com.conel.market.user.repository.UserRepository;

@@ -1,8 +1,8 @@
-package com.conel.market.models.cart;
+package com.conel.market.cart;
 
-import com.conel.market.models.cart.dto.AddToCartRequest;
-import com.conel.market.models.cart.dto.CartResponse;
-import com.conel.market.models.cart.dto.UpdateCartItemRequest;
+import com.conel.market.cart.dto.AddToCartRequest;
+import com.conel.market.cart.dto.CartResponse;
+import com.conel.market.cart.dto.UpdateCartItemRequest;
 import com.conel.market.user.entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

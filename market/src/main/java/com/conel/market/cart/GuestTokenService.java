@@ -1,4 +1,4 @@
-package com.conel.market.models.cart;
+package com.conel.market.cart;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;

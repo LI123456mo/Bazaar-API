@@ -1,8 +1,8 @@
-package com.conel.market.models.cart;
+package com.conel.market.cart;
 
 import com.conel.market.entity.product.Product;
-import com.conel.market.models.cart.dto.CartItemResponse;
-import com.conel.market.models.cart.dto.CartResponse;
+import com.conel.market.cart.dto.CartItemResponse;
+import com.conel.market.cart.dto.CartResponse;
 import com.conel.market.user.entity.User;
 import org.springframework.stereotype.Component;
 
