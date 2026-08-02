@@ -14,6 +14,8 @@ public enum RoleEnum {
         add(ORDER_READ);
         add(USER_READ);
         add(USER_UPDATE);
+        add(CART_READ);
+        add(CART_WRITE);
     }}),
 
     VENDOR(new HashSet<>(){{

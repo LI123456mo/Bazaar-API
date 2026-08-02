@@ -72,6 +72,14 @@ public enum ErrorCode {
             HttpStatus.FORBIDDEN),
     EMPTY_ORDER("ORDER_002","order required",HttpStatus.FORBIDDEN),
 
+    // CART
+    CART_ITEM_NOT_FOUND("CART_001",
+            "Cart item not found",
+            HttpStatus.NOT_FOUND),
+    CART_NOT_FOUND("CART_002",
+            "Cart not found",
+            HttpStatus.NOT_FOUND),
+ 
     //  VENDOR
     VENDOR_NOT_FOUND("VENDOR_001",
             "Vendor not found",

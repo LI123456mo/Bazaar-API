@@ -33,6 +33,10 @@ public enum Permission {
     CATEGORY_UPDATE("category:update"),
     CATEGORY_DELETE("category:delete"),
 
+    // Cart access
+    CART_READ("cart:read"),
+    CART_WRITE("cart:write"),
+
     // Admin
     ADMIN_ACCESS("admin:access"),
     SUPER_ADMIN_ACCESS("super_admin:access");
