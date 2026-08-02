@@ -29,19 +29,18 @@ public class CartService {
     private final CartMapper cartMapper;
 
     @Transactional(readOnly = true)
-    public CartResponse getCart(String userId) {
-        return cartMapper.toCartResponse(getOrCreateCart(userId));
+    public CartResponse getCart(CartOwner owner) {
+        return cartMapper.toCartResponse(getOrCreateCart(owner));
     }
 
-    public CartResponse addToCart(String userId, AddToCartRequest request) {
-        Cart cart = getOrCreateCart(userId);
+    public CartResponse addToCart(CartOwner owner, AddToCartRequest request) {
+        Cart cart = getOrCreateCart(owner);
         Product product = productRepository.findById(request.productId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
 
         if (!product.isActive()) {
             throw new BusinessException(ErrorCode.PRODUCT_ARCHIVED);
         }
-
         if (product.getStockQuantity() == null || product.getStockQuantity() < request.quantity()) {
             throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
         }
@@ -50,9 +49,7 @@ public class CartService {
         if (existingItem.isPresent()) {
             CartItem cartItem = existingItem.get();
             int newQuantity = cartItem.getQuantity() + request.quantity();
-            if (product.getStockQuantity() < newQuantity) {
-                throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
-            }
+
             cartItem.setQuantity(newQuantity);
             cartItemRepository.save(cartItem);
         } else {
@@ -66,12 +63,12 @@ public class CartService {
         }
 
         cartRepository.save(cart);
-        log.info("Added {} units of product {} to cart {}", request.quantity(), product.getId(), userId);
-        return cartMapper.toCartResponse(getOrCreateCart(userId));
+        log.info("Added {} units of product {} to cart {}", request.quantity(), product.getId(), cart.getId());
+        return cartMapper.toCartResponse(getOrCreateCart(owner));
     }
 
-    public CartResponse updateCartItem(String userId, String cartItemId, UpdateCartItemRequest request) {
-        Cart cart = getOrCreateCart(userId);
+    public CartResponse updateCartItem(CartOwner owner, String cartItemId, UpdateCartItemRequest request) {
+        Cart cart = getOrCreateCart(owner);
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND));
 
@@ -82,8 +79,8 @@ public class CartService {
         if (request.quantity() == 0) {
             cart.getItems().remove(cartItem);
             cartRepository.save(cart);
-            log.info("Removed cart item {} from cart {}", cartItemId, userId);
-            return cartMapper.toCartResponse(getOrCreateCart(userId));
+            log.info("Removed cart item {} from cart {}", cartItemId, cart.getId());
+            return cartMapper.toCartResponse(getOrCreateCart(owner));
         }
 
         Product product = cartItem.getProduct();
@@ -93,12 +90,12 @@ public class CartService {
 
         cartItem.setQuantity(request.quantity());
         cartItemRepository.save(cartItem);
-        log.info("Updated cart item {} quantity to {} for cart {}", cartItemId, request.quantity(), userId);
-        return cartMapper.toCartResponse(getOrCreateCart(userId));
+        log.info("Updated cart item {} quantity to {} for cart {}", cartItemId, request.quantity(), cart.getId());
+        return cartMapper.toCartResponse(getOrCreateCart(owner));
     }
 
-    public CartResponse removeFromCart(String userId, String cartItemId) {
-        Cart cart = getOrCreateCart(userId);
+    public CartResponse removeFromCart(CartOwner owner, String cartItemId) {
+        Cart cart = getOrCreateCart(owner);
         CartItem cartItem = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CART_ITEM_NOT_FOUND));
 
@@ -108,21 +105,75 @@ public class CartService {
 
         cart.getItems().remove(cartItem);
         cartRepository.save(cart);
-        log.info("Removed cart item {} from cart {}", cartItemId, userId);
-        return cartMapper.toCartResponse(getOrCreateCart(userId));
+        log.info("Removed cart item {} from cart {}", cartItemId, cart.getId());
+        return cartMapper.toCartResponse(getOrCreateCart(owner));
     }
 
-    public void clearCart(String userId) {
-        Cart cart = getOrCreateCart(userId);
+    public void clearCart(CartOwner owner) {
+        Cart cart = getOrCreateCart(owner);
         cart.getItems().clear();
         cartRepository.save(cart);
-        log.info("Cleared cart {}", userId);
+        log.info("Cleared cart {}", cart.getId());
+    }
+
+    /**
+     *  core merge logic — called at login. Folds a guest cart's items into
+     * the now-authenticated user's permanent cart, summing quantities for products
+     * that exist in both, then deletes the guest cart entirely.
+     */
+    public void mergeGuestCartIntoUser(String guestToken, String userId) {
+        Optional<Cart> guestCartOpt = cartRepository.findByGuestToken(guestToken);
+        if (guestCartOpt.isEmpty() || guestCartOpt.get().getItems().isEmpty()) {
+            return; // nothing to merge
+        }
+        Cart guestCart = guestCartOpt.get();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        Cart userCart = cartRepository.findByUserId(userId)
+                .orElseGet(() -> cartRepository.save(Cart.builder().user(user).build()));
+
+        for (CartItem guestItem : guestCart.getItems()) {
+            Optional<CartItem> matchingUserItem = cartItemRepository
+                    .findByCartIdAndProductId(userCart.getId(), guestItem.getProduct().getId());
+
+            if (matchingUserItem.isPresent()) {
+                CartItem userItem = matchingUserItem.get();
+                int mergedQuantity = userItem.getQuantity() + guestItem.getQuantity();
+                // Cap at available stock rather than failing the whole login — silently
+                // capping is friendlier UX than blocking login over a cart quantity conflict.
+                int cappedQuantity = Math.min(mergedQuantity, safeStock(guestItem.getProduct()));
+                userItem.setQuantity(Math.max(cappedQuantity, 1));
+                cartItemRepository.save(userItem);
+            } else {
+                CartItem movedItem = CartItem.builder()
+                        .cart(userCart)
+                        .product(guestItem.getProduct())
+                        .quantity(Math.min(guestItem.getQuantity(), safeStock(guestItem.getProduct())))
+                        .build();
+                userCart.getItems().add(movedItem);
+                cartItemRepository.save(movedItem);
+            }
+        }
+
+        cartRepository.save(userCart);
+
+        // Guest cart's job is done — delete it and its now-empty item list.
+        cartItemRepository.deleteByCartId(guestCart.getId());
+        cartRepository.delete(guestCart);
+
+        log.info("Merged guest cart {} into user {} cart {}", guestCart.getId(), userId, userCart.getId());
+    }
+
+    private int safeStock(Product product) {
+        return product.getStockQuantity() == null ? 0 : product.getStockQuantity();
     }
 
     private Cart getOrCreateCart(CartOwner owner) {
-        if (owner.isGuest()){
+        if (owner.isGuest()) {
             return cartRepository.findByGuestToken(owner.guestToken())
-                    .orElseGet(()->cartRepository.save(
+                    .orElseGet(() -> cartRepository.save(
                             Cart.builder().guestToken(owner.guestToken()).build()
                     ));
         }
