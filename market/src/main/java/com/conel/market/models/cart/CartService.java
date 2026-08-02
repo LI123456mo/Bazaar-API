@@ -49,7 +49,9 @@ public class CartService {
         if (existingItem.isPresent()) {
             CartItem cartItem = existingItem.get();
             int newQuantity = cartItem.getQuantity() + request.quantity();
-
+            if (product.getStockQuantity() < newQuantity) {
+                throw new BusinessException(ErrorCode.INSUFFICIENT_STOCK);
+            }
             cartItem.setQuantity(newQuantity);
             cartItemRepository.save(cartItem);
         } else {
@@ -116,15 +118,10 @@ public class CartService {
         log.info("Cleared cart {}", cart.getId());
     }
 
-    /**
-     *  core merge logic — called at login. Folds a guest cart's items into
-     * the now-authenticated user's permanent cart, summing quantities for products
-     * that exist in both, then deletes the guest cart entirely.
-     */
     public void mergeGuestCartIntoUser(String guestToken, String userId) {
         Optional<Cart> guestCartOpt = cartRepository.findByGuestToken(guestToken);
         if (guestCartOpt.isEmpty() || guestCartOpt.get().getItems().isEmpty()) {
-            return; // nothing to merge
+            return;
         }
         Cart guestCart = guestCartOpt.get();
 
@@ -141,8 +138,6 @@ public class CartService {
             if (matchingUserItem.isPresent()) {
                 CartItem userItem = matchingUserItem.get();
                 int mergedQuantity = userItem.getQuantity() + guestItem.getQuantity();
-                // Cap at available stock rather than failing the whole login — silently
-                // capping is friendlier UX than blocking login over a cart quantity conflict.
                 int cappedQuantity = Math.min(mergedQuantity, safeStock(guestItem.getProduct()));
                 userItem.setQuantity(Math.max(cappedQuantity, 1));
                 cartItemRepository.save(userItem);
@@ -158,8 +153,6 @@ public class CartService {
         }
 
         cartRepository.save(userCart);
-
-        // Guest cart's job is done — delete it and its now-empty item list.
         cartItemRepository.deleteByCartId(guestCart.getId());
         cartRepository.delete(guestCart);
 

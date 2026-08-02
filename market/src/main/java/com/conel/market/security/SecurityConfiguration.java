@@ -32,6 +32,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/rag/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/v1/categories", "/api/v1/categories/**","/api/v1/products","/api/v1/products/**","/api/v1/files/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
+                        .requestMatchers("/api/v1/cart/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
