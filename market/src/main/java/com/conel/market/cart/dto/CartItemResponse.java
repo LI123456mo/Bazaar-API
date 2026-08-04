@@ -2,7 +2,6 @@ package com.conel.market.cart.dto;
 
 import java.math.BigDecimal;
 
-
 public record CartItemResponse(
         String cartItemId,
         String productId,
@@ -10,6 +9,9 @@ public record CartItemResponse(
         String productImageUrl,
         BigDecimal unitPrice,
         Integer quantity,
-        BigDecimal subtotal
+        BigDecimal subtotal,
+        String vendorId,
+        String vendorName,
+        boolean inStock
 ) {
 }

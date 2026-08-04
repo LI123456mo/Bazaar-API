@@ -42,7 +42,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final UserVerificationService userVerificationService;
-    private final CartService cartService;             // CHANGE: added
+    private final CartService cartService;
     private final GuestTokenService guestTokenService;
 
     @Override

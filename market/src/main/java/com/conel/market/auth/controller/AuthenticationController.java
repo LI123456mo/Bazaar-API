@@ -11,6 +11,8 @@ import com.conel.market.emailVerification.PasswordResetService;
 import com.conel.market.emailVerification.UserVerificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -37,9 +39,11 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> login(
             @Valid
             @RequestBody
-            final AuthenticationRequest request
+            final AuthenticationRequest request,
+            HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse
     ){
-        return ResponseEntity.ok(this.authenticationService.login(request));
+        return ResponseEntity.ok(this.authenticationService.login(request,httpRequest,httpResponse));
     }
 
     @PostMapping("/register")
