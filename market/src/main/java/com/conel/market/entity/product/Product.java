@@ -40,7 +40,7 @@ public class Product extends BaseEntity {
     private String imageUrl;
     private String downloadUrl;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
