@@ -2,12 +2,7 @@ package com.conel.market.cart;
 
 import com.conel.market.entity.BaseEntity;
 import com.conel.market.entity.product.Product;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -15,8 +10,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -27,7 +25,11 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @SuperBuilder
 @ToString(callSuper = true)
-public class CartItem extends BaseEntity {
+public class CartItem {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id", nullable = false)
@@ -43,6 +45,13 @@ public class CartItem extends BaseEntity {
 
     @Column(nullable = false)
     private Integer quantity;
+
+    @CreationTimestamp
+    @Column(updatable = false, nullable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     public BigDecimal getSubtotal() {
         if (product == null || product.getPrice() == null || quantity == null) {
