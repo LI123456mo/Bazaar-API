@@ -86,7 +86,11 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductResponse findById(String id) {
-        return productMapper.toProductResponseDto(getProductEntity(id));
+        Product product = getProductEntity(id);
+        if (!product.isActive()) {
+            throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+        return productMapper.toProductResponseDto(product);
     }
 
     @Transactional(readOnly = true)
@@ -164,6 +168,9 @@ public class ProductService {
     @Transactional
     public void deleteProduct(String id, User authenticatedUser) {
         Product product = getProductEntity(id);
+        if (!product.isActive()) {
+            throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
         validateProductOwnership(product, authenticatedUser);
         product.setActive(false);
         log.info("Product {} deactivated by user {}", id, authenticatedUser.getId());
