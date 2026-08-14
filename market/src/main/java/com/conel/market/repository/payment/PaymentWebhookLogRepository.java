@@ -1,6 +1,5 @@
 package com.conel.market.repository.payment;
 
-import com.conel.market.entity.payment.PaymentWebhookLog;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
