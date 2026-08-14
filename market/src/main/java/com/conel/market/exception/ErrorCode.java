@@ -136,6 +136,11 @@ public enum ErrorCode {
             "The passwords do not match",
             HttpStatus.BAD_REQUEST),
 
+    //  PAYMENT
+    INVALID_PAYMENT_STATE_TRANSITION("PAYMENT_001",
+            "Invalid payment state transition",
+            HttpStatus.BAD_REQUEST),
+
     // GENERIC
     INTERNAL_SERVER_ERROR("ERR_001",
             "An unexpected error occurred",

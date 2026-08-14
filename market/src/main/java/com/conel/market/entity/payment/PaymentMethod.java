@@ -1,9 +1,6 @@
 package com.conel.market.entity.payment;
 
-/**
- * Supported payment methods in the marketplace.
- * Currently supporting M-Pesa (primary for Kenya market), CARD, COD, WALLET.
- */
+
 public enum PaymentMethod {
     M_PESA("M-Pesa", "Safaricom M-Pesa STK Push"),
     CARD("Card", "Debit/Credit Card via payment gateway"),

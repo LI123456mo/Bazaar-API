@@ -43,11 +43,15 @@ public class ProductMapper {
             categoryName = product.getCategory().getName();
         }
 
+        String imageUrl = product.getImageUrl() != null
+                ? "/api/v1/files/" + product.getImageUrl()
+                : null;
+
         return new ProductResponse(
                 product.getId(),
                 product.getName(),
                 product.getPrice(),
-                product.getImageUrl(),
+                imageUrl,
                 categoryName,
                 product.getCreatedBy() != null ? product.getCreatedBy() : "Marketplace Merchant"
         );

@@ -1,10 +1,6 @@
 package com.conel.market.entity.payment;
 
-/**
- * Payment lifecycle states.
- * State machine: INITIATED → PENDING → (COMPLETED | FAILED) → [optional: REFUNDED]
- * TIMEOUT: Payment not completed within threshold (30 minutes)
- */
+
 public enum PaymentStatus {
     INITIATED("Payment initiated, awaiting provider response"),
     PENDING("Payment pending, waiting for user action (e.g., M-Pesa STK prompt)"),
@@ -30,7 +26,7 @@ public enum PaymentStatus {
 
     public boolean canTransitionTo(PaymentStatus targetStatus) {
         return switch (this) {
-            case INITIATED -> targetStatus == PENDING || targetStatus == FAILED || targetStatus == CANCELLED;
+            case INITIATED -> targetStatus == PENDING || targetStatus == FAILED || targetStatus == CANCELLED || targetStatus == TIMEOUT;
             case PENDING -> targetStatus == COMPLETED || targetStatus == FAILED || targetStatus == TIMEOUT || targetStatus == CANCELLED;
             case COMPLETED -> targetStatus == REFUNDED;
             case FAILED, REFUNDED, TIMEOUT, CANCELLED -> false;
