@@ -11,7 +11,6 @@ import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(
@@ -88,19 +87,19 @@ public class Payment extends BaseEntity {
     @Column(nullable = false)
     private Instant initiatedAt;
 
-    private LocalDateTime statusUpdatedAt;
+    private Instant statusUpdatedAt;
 
-    private LocalDateTime completedAt;
+    private Instant completedAt;
 
     @Column(columnDefinition = "INT DEFAULT 0")
     private Integer retryCount;
 
-    private LocalDateTime nextRetryAt;
+    private Instant nextRetryAt;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean reconciled;
 
-    private LocalDateTime reconciledAt;
+    private Instant reconciledAt;
 
     public void transitionTo(PaymentStatus newStatus) {
         if (!status.canTransitionTo(newStatus)) {
@@ -110,9 +109,9 @@ public class Payment extends BaseEntity {
             );
         }
         this.status = newStatus;
-        this.statusUpdatedAt = LocalDateTime.now();
+        this.statusUpdatedAt = Instant.now();
         if (newStatus == PaymentStatus.COMPLETED) {
-            this.completedAt = LocalDateTime.now();
+            this.completedAt = Instant.now();
         }
     }
 
@@ -124,6 +123,6 @@ public class Payment extends BaseEntity {
     public void scheduleRetry(long baseDelaySeconds) {
         this.retryCount = (this.retryCount != null ? this.retryCount : 0) + 1;
         long delaySeconds = baseDelaySeconds * (long) Math.pow(2, retryCount - 1);
-        this.nextRetryAt = LocalDateTime.now().plusSeconds(delaySeconds);
+        this.nextRetryAt = Instant.now().plusSeconds(delaySeconds);
     }
 }
