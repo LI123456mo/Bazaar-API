@@ -3,6 +3,7 @@ package com.conel.market.dto.payment;
 import com.conel.market.entity.payment.PaymentStatus;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 /**
@@ -34,5 +35,5 @@ public record PaymentInitiationResponse(
     String currency,
     String message,
     String nextAction,
-    LocalDateTime initiatedAt
+    Instant initiatedAt
 ) {}

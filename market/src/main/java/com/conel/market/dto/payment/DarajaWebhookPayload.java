@@ -3,11 +3,6 @@ package com.conel.market.dto.payment;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Webhook payload received from Safaricom Daraja API (M-Pesa).
- * Contains callback data when customer completes STK push transaction.
- * 
- * M-Pesa sends this as POST to /api/payments/webhook/mpesa
- * 
  * Example payload:
  * {
  *   "Body": {
