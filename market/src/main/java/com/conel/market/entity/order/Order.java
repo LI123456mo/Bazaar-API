@@ -1,6 +1,8 @@
 package com.conel.market.entity.order;
 
 import com.conel.market.entity.BaseEntity;
+import com.conel.market.entity.payment.PaymentMethod;
+import com.conel.market.entity.payment.PaymentStatus;
 import com.conel.market.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,7 +14,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "orders")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
@@ -26,8 +29,14 @@ public class Order extends BaseEntity {
     @Column(nullable = false)
     private OrderStatus status;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String paymentMethod;
+    private PaymentMethod paymentMethod;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentStatus paymentStatus = PaymentStatus.INITIATED;
 
     @Column(columnDefinition = "TEXT")
     private String shippingAddress;
@@ -45,7 +54,7 @@ public class Order extends BaseEntity {
     private User user;
 
     @Builder.Default
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<OrderItem> orderItems = new ArrayList<>();

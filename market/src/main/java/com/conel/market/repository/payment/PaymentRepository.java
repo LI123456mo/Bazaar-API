@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,43 +25,24 @@ import java.util.Optional;
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, String> {
 
-    /**
-     * Find payment by idempotency key (for deduplication).
-     * Used to check if identical payment request was already processed.
-     * @param idempotencyKey unique identifier for request deduplication
-     * @return Payment if found, empty if new request
-     */
+
     Optional<Payment> findByIdempotencyKey(String idempotencyKey);
 
-    /**
-     * Find payment by external transaction reference (M-Pesa, Stripe, etc).
-     * Used for reconciliation and duplicate detection.
-     * @param externalRef transaction ID from payment gateway
-     * @return Payment if matched
-     */
+
     Optional<Payment> findByExternalTransactionRef(String externalRef);
 
-    /**
-     * Find payment by order ID.
-     * @param orderId unique order identifier
-     * @return Payment associated with order
-     */
-    Optional<Payment> findByOrderId(String orderId);
 
-    /**
-     * Find all payments with specific status.
-     * Used for status-based reporting and batch operations.
-     * @param status payment status to filter by
-     * @param pageable pagination
-     * @return page of payments with matching status
-     */
+
+    List<Payment> findAllByOrderId(String orderId);
+
+
+    @Query("SELECT p FROM Payment p WHERE p.order.id = :orderId AND p.status = 'COMPLETED'")
+    Optional<Payment> findCompletedPaymentByOrderId(@Param("orderId") String orderId);
+
+
     Page<Payment> findByStatus(PaymentStatus status, Pageable pageable);
 
-    /**
-     * Find all payments in PENDING state (waiting for user action or provider response).
-     * Used by scheduler to check for timed-out payments.
-     * @return list of pending payments
-     */
+
     @Query("SELECT p FROM Payment p WHERE p.status = 'PENDING' ORDER BY p.initiatedAt ASC")
     List<Payment> findAllPending();
 
@@ -72,7 +53,7 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
      * @return list of timed-out payments
      */
     @Query("SELECT p FROM Payment p WHERE p.status = 'PENDING' AND p.initiatedAt < :threshold ORDER BY p.initiatedAt ASC")
-    List<Payment> findTimedOutPayments(@Param("threshold") LocalDateTime thresholdTime);
+    List<Payment> findTimedOutPayments(@Param("threshold") Instant thresholdTime);
 
     /**
      * Find payments ready for retry (next retry time <= now).
@@ -83,7 +64,7 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
     @Query("SELECT p FROM Payment p WHERE p.status IN ('INITIATED', 'PENDING', 'FAILED') " +
            "AND p.nextRetryAt IS NOT NULL AND p.nextRetryAt <= :now " +
            "ORDER BY p.nextRetryAt ASC")
-    List<Payment> findPaymentsReadyForRetry(@Param("now") LocalDateTime nowTime);
+    List<Payment> findPaymentsReadyForRetry(@Param("now") Instant nowTime);
 
     /**
      * Find all payments created within date range.
@@ -93,7 +74,7 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
      * @return payments in date range
      */
     @Query("SELECT p FROM Payment p WHERE p.createdAt >= :start AND p.createdAt <= :end ORDER BY p.createdAt DESC")
-    List<Payment> findPaymentsByDateRange(@Param("start") LocalDateTime startDate, @Param("end") LocalDateTime endDate);
+    List<Payment> findPaymentsByDateRange(@Param("start") Instant startDate, @Param("end") Instant endDate);
 
     /**
      * Count payments by status.
@@ -103,20 +84,11 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
      */
     Long countByStatus(PaymentStatus status);
 
-    /**
-     * Find all payments not yet reconciled.
-     * Used by reconciliation service.
-     * @return list of unreconciled payments
-     */
+
     @Query("SELECT p FROM Payment p WHERE p.reconciled = FALSE ORDER BY p.createdAt ASC")
     List<Payment> findUnreconciledPayments();
 
-    /**
-     * Find payments by user ID (for customer service queries).
-     * @param userId user identifier
-     * @param pageable pagination
-     * @return customer's payments
-     */
+
     @Query("SELECT p FROM Payment p WHERE p.user.id = :userId ORDER BY p.createdAt DESC")
     Page<Payment> findByUserId(@Param("userId") String userId, Pageable pageable);
 }
