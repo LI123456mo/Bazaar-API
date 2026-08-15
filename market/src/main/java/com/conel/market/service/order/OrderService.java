@@ -8,6 +8,7 @@ import com.conel.market.exception.BusinessException;
 import com.conel.market.exception.ErrorCode;
 import com.conel.market.entity.order.Order;
 import com.conel.market.entity.order.OrderItem;
+import com.conel.market.entity.payment.PaymentStatus;
 import com.conel.market.repository.order.OrderRepository;
 import com.conel.market.entity.order.OrderStatus;
 import com.conel.market.dto.order.request.OrderRequest;
@@ -27,7 +28,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal; // CHANGE: added
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -99,7 +100,7 @@ public class OrderService {
                 savedOrders.isEmpty() ? null : savedOrders.get(0).getId(),
                 runningTotalAmount,
                 OrderStatus.PENDING.name(),
-                request.paymentMethod(),
+                request.paymentMethod().name(),
                 request.shippingAddress(),
                 responseItemsList
         );
@@ -116,7 +117,7 @@ public class OrderService {
                 order.getId(),
                 order.getTotalAmount(),
                 order.getStatus().name(),
-                order.getPaymentMethod(),
+                order.getPaymentMethod().name(),
                 order.getShippingAddress(),
                 toOrderItemResponses(order)
         );
@@ -129,7 +130,7 @@ public class OrderService {
                         order.getId(),
                         order.getTotalAmount(),
                         order.getStatus().name(),
-                        order.getPaymentMethod(),
+                        order.getPaymentMethod().name(),
                         order.getShippingAddress(),
                         toOrderItemResponses(order)
                 ));
@@ -151,6 +152,7 @@ public class OrderService {
         return Order.builder()
                 .status(OrderStatus.PENDING)
                 .paymentMethod(request.paymentMethod())
+                .paymentStatus(PaymentStatus.INITIATED)
                 .shippingAddress(request.shippingAddress())
                 .user(buyer)
                 .buyerEmailSnapshot(buyer.getEmail())
