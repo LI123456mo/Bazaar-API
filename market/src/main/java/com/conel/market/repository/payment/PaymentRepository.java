@@ -31,7 +31,7 @@ public interface PaymentRepository extends JpaRepository<Payment, String> {
 
     Optional<Payment> findByExternalTransactionRef(String externalRef);
 
-
+    Optional<Payment> findByCheckoutRequestId(String checkoutRequestId);
 
     List<Payment> findAllByOrderId(String orderId);
 

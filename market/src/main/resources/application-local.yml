@@ -45,3 +45,12 @@ spring:
       base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
       embedding:
         model: nomic-embed-text
+
+#        m-pesa
+mpesa:
+  consumer-key: ${MPESA_CONSUMER_KEY:REPLACE_ME}
+  consumer-secret: ${MPESA_CONSUMER_SECRET:REPLACE_ME}
+  shortcode: ${MPESA_SHORTCODE:174379}
+  passkey: ${MPESA_PASSKEY:REPLACE_ME}
+  callback-url: ${MPESA_CALLBACK_URL:http://localhost:8080/api/v1/payments/webhook/mpesa}
+  base-url: ${MPESA_BASE_URL:https://sandbox.safaricom.co.ke}
