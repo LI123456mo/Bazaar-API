@@ -8,15 +8,13 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true,securedEnabled = true)
+@EnableMethodSecurity(prePostEnabled = true, securedEnabled = true)
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
@@ -26,18 +24,19 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(csrf-> csrf.disable())
-                .authorizeHttpRequests(auth->auth
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/rag/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/v1/categories", "/api/v1/categories/**","/api/v1/products","/api/v1/products/**","/api/v1/files/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/categories", "/api/v1/categories/**", "/api/v1/products", "/api/v1/products/**", "/api/v1/files/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
                         .requestMatchers("/api/v1/cart/**").permitAll()
+                        .requestMatchers("/api/v1/payments/webhook/**").permitAll() // M-Pesa can't send a JWT
                         .anyRequest().authenticated()
                 )
-                .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthFilter,UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }
