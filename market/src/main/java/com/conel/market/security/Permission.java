@@ -16,6 +16,10 @@ public enum Permission {
     ORDER_UPDATE("order:update"),
     ORDER_READ_ALL("order:read_all"),
 
+    // Payment permissions
+    PAYMENT_CREATE("payment:create"),
+    PAYMENT_READ("payment:read"),
+
     // User management
     USER_READ("user:read"),
     USER_UPDATE("user:update"),
