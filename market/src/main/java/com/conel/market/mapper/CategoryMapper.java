@@ -13,7 +13,7 @@ public class CategoryMapper {
     public Category toCategory(CategoryRequest dto){
         var category = new Category();
         category.setName(dto.name());
-        category.setDescription(dto.description()); // 👑 FIXED: Maps the description field correctly!
+        category.setDescription(dto.description());
         return category;
     }
 
@@ -30,7 +30,6 @@ public class CategoryMapper {
         }
     }
 
-    //WHAT THE USER NEEDS TO SEE
     public CategoryResponse toCategoryResponseDto(Category category){
         return new CategoryResponse(category.getId(),category.getName(), category.getDescription(), category.getCreatedAt(),category.getCreatedBy());
     }

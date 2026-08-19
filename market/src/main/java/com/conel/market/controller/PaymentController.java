@@ -4,9 +4,11 @@ import com.conel.market.dto.payment.DarajaWebhookPayload;
 import com.conel.market.dto.payment.PaymentInitiationRequest;
 import com.conel.market.dto.payment.PaymentInitiationResponse;
 import com.conel.market.dto.payment.PaymentStatusResponse;
+import com.conel.market.gateway.payment.MpesaGatewayClient;
 import com.conel.market.service.payment.PaymentService;
 import com.conel.market.user.entity.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class PaymentController {
 
     private final PaymentService paymentService;
+    private final MpesaGatewayClient mpesaGatewayClient;
     private final ObjectMapper objectMapper;
 
     @PostMapping("/initiate")
@@ -48,8 +51,18 @@ public class PaymentController {
     }
 
     @PostMapping("/webhook/mpesa")
-    public ResponseEntity<String> handleMpesaWebhook(@RequestBody String rawBody) {
+    public ResponseEntity<String> handleMpesaWebhook(
+            @RequestBody String rawBody,
+            HttpServletRequest httpRequest
+    ) {
         log.info("Received M-Pesa webhook");
+
+        String sourceIp = httpRequest.getRemoteAddr();
+        if (!mpesaGatewayClient.verifySignature(rawBody, null, sourceIp)) {
+            log.warn("Rejected M-Pesa webhook — failed source IP check from {}", sourceIp);
+            return ResponseEntity.ok("{\"ResultCode\":0,\"ResultDesc\":\"Accepted\"}");
+        }
+
         try {
             DarajaWebhookPayload payload = objectMapper.readValue(rawBody, DarajaWebhookPayload.class);
             paymentService.handleMpesaWebhook(payload, rawBody);

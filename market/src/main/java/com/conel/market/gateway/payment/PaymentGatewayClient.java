@@ -9,7 +9,7 @@ public interface PaymentGatewayClient {
 
     GatewayInitiationResult initiate(PaymentInitiationRequest request, BigDecimal amount, String idempotencyKey);
 
-    boolean verifySignature(String rawPayload, String signatureHeader);
+    boolean verifySignature(String rawPayload, String signatureHeader, String sourceIp);
 
     PaymentMethod supportedMethod();
 
