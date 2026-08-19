@@ -4,8 +4,10 @@ import com.conel.market.dto.payment.DarajaWebhookPayload;
 import com.conel.market.dto.payment.PaymentInitiationRequest;
 import com.conel.market.dto.payment.PaymentInitiationResponse;
 import com.conel.market.dto.payment.PaymentStatusResponse;
+import com.conel.market.entity.payment.PaymentTransaction;
 import com.conel.market.gateway.payment.MpesaGatewayClient;
 import com.conel.market.service.payment.PaymentService;
+import com.conel.market.service.payment.PaymentTransactionService;
 import com.conel.market.user.entity.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +29,7 @@ public class PaymentController {
     private final PaymentService paymentService;
     private final MpesaGatewayClient mpesaGatewayClient;
     private final ObjectMapper objectMapper;
+    private final PaymentTransactionService paymentTransactionService;
 
     @PostMapping("/initiate")
     @PreAuthorize("hasAuthority('payment:create')")
@@ -60,6 +63,7 @@ public class PaymentController {
         String sourceIp = httpRequest.getRemoteAddr();
         if (!mpesaGatewayClient.verifySignature(rawBody, null, sourceIp)) {
             log.warn("Rejected M-Pesa webhook — failed source IP check from {}", sourceIp);
+            paymentTransactionService.recordRejectedWebhook(rawBody, sourceIp);
             return ResponseEntity.ok("{\"ResultCode\":0,\"ResultDesc\":\"Accepted\"}");
         }
 

@@ -31,7 +31,7 @@ public class PaymentTransaction extends BaseEntity {
     @EqualsAndHashCode.Exclude
     private Payment payment;
 
-    @Column(nullable = false, length = 255)
+    @Column(length = 255)
     private String externalTransactionId;
 
     @Enumerated(EnumType.STRING)
