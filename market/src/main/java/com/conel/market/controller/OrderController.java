@@ -4,6 +4,7 @@ import com.conel.market.service.order.OrderService;
 import com.conel.market.dto.order.request.OrderRequest;
 import com.conel.market.dto.order.response.OrderResponse;
 import com.conel.market.user.entity.User;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/orders")
 @RequiredArgsConstructor
+@Tag(name = "Order Management", description = "APIs for managing order profiles")
 public class OrderController {
     private final OrderService orderService;
 

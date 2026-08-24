@@ -63,7 +63,6 @@ public class PaymentService {
         User buyer = userRepository.findById(authenticatedUserId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-
         Order order = orderRepository.findById(request.orderId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -71,11 +70,11 @@ public class PaymentService {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
-        if (order.getPaymentStatus()== PaymentStatus.COMPLETED){
+        if (order.getPaymentStatus() == PaymentStatus.COMPLETED){
             throw new BusinessException(ErrorCode.ORDER_ALREADY_PAID);
         }
 
-        Payment payment=Payment.builder()
+        Payment payment = Payment.builder()
                 .order(order)
                 .user(buyer)
                 .idempotencyKey(request.idempotencyKey())
@@ -89,17 +88,27 @@ public class PaymentService {
                 .reconciled(false)
                 .build();
 
+        payment = paymentRepository.save(payment);
 
-        PaymentGatewayClient gateway=gatewayClients.get(request.paymentMethod());
+        PaymentGatewayClient gateway = gatewayClients.get(request.paymentMethod());
         if (gateway == null) {
+            payment.setErrorMessage("No gateway configured for payment method " + request.paymentMethod());
+            payment.transitionTo(PaymentStatus.FAILED);
+            paymentRepository.save(payment);
             throw new BusinessException(ErrorCode.PAYMENT_INITIATION_FAILED,
                     "No gateway configured for payment method " + request.paymentMethod());
         }
 
-        PaymentGatewayClient.GatewayInitiationResult result=
-                gateway.initiate(request,order.getTotalAmount(), request.idempotencyKey());
+        PaymentGatewayClient.GatewayInitiationResult result;
+        try {
+            result = gateway.initiate(request, order.getTotalAmount(), request.idempotencyKey());
+        } catch (BusinessException e) {
+            payment.setErrorMessage(e.getMessage());
+            payment.transitionTo(PaymentStatus.FAILED);
+            paymentRepository.save(payment);
+            throw e;
+        }
 
-        //tracking reference for payment
         payment.setMerchantRequestId(result.merchantRequestId());
         payment.setCheckoutRequestId(result.checkoutRequestId());
         payment.setGatewayResponse(result.rawResponse());
@@ -111,7 +120,7 @@ public class PaymentService {
             payment.setErrorMessage("Payment initiation rejected by gateway");
         }
 
-        paymentRepository.save(payment);
+        payment = paymentRepository.save(payment);
         order.setPaymentStatus(payment.getStatus());
         orderRepository.save(order);
         return toInitiationResponse(payment);

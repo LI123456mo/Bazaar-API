@@ -29,7 +29,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/rag/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/categories", "/api/v1/categories/**", "/api/v1/products", "/api/v1/products/**", "/api/v1/files/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs.yaml").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs.yaml","/api/swagger-ui/**","/api/swagger-ui.html","/api/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/v1/cart/**").permitAll()
                         .requestMatchers("/api/v1/payments/webhook/**").permitAll() // M-Pesa can't send a JWT
                         .anyRequest().authenticated()
