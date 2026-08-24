@@ -28,31 +28,34 @@ import java.util.stream.Collectors;
 @Service
 public class PaymentService {
 
+    private static final String DEFAULT_CURRENCY = "KES";
+
     private final PaymentRepository paymentRepository;
     private final PaymentTransactionRepository paymentTransactionRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final PaymentAuditService paymentAuditService;
     private final Map<PaymentMethod, PaymentGatewayClient> gatewayClients;
-    private static final String DEFAULT_CURRENCY = "KES";
 
     public PaymentService(
             PaymentRepository paymentRepository,
             PaymentTransactionRepository paymentTransactionRepository,
             OrderRepository orderRepository,
             UserRepository userRepository,
+            PaymentAuditService paymentAuditService,
             List<PaymentGatewayClient> clients
     ) {
         this.paymentRepository = paymentRepository;
         this.paymentTransactionRepository = paymentTransactionRepository;
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
+        this.paymentAuditService = paymentAuditService;
         this.gatewayClients = clients.stream()
                 .collect(Collectors.toMap(PaymentGatewayClient::supportedMethod, c -> c));
     }
 
-
     @Transactional
-    public PaymentInitiationResponse initiationResponse(PaymentInitiationRequest request, String authenticatedUserId){
+    public PaymentInitiationResponse initiationResponse(PaymentInitiationRequest request, String authenticatedUserId) {
 
         var existing = paymentRepository.findByIdempotencyKey(request.idempotencyKey());
         if (existing.isPresent()) {
@@ -66,11 +69,11 @@ public class PaymentService {
         Order order = orderRepository.findById(request.orderId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
-        if (!order.getUser().getId().equals(authenticatedUserId)){
+        if (!order.getUser().getId().equals(authenticatedUserId)) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
-        if (order.getPaymentStatus() == PaymentStatus.COMPLETED){
+        if (order.getPaymentStatus() == PaymentStatus.COMPLETED) {
             throw new BusinessException(ErrorCode.ORDER_ALREADY_PAID);
         }
 
@@ -92,20 +95,16 @@ public class PaymentService {
 
         PaymentGatewayClient gateway = gatewayClients.get(request.paymentMethod());
         if (gateway == null) {
-            payment.setErrorMessage("No gateway configured for payment method " + request.paymentMethod());
-            payment.transitionTo(PaymentStatus.FAILED);
-            paymentRepository.save(payment);
-            throw new BusinessException(ErrorCode.PAYMENT_INITIATION_FAILED,
-                    "No gateway configured for payment method " + request.paymentMethod());
+            String msg = "No gateway configured for payment method " + request.paymentMethod();
+            paymentAuditService.markFailed(payment, msg);
+            throw new BusinessException(ErrorCode.PAYMENT_INITIATION_FAILED, msg);
         }
 
         PaymentGatewayClient.GatewayInitiationResult result;
         try {
             result = gateway.initiate(request, order.getTotalAmount(), request.idempotencyKey());
         } catch (BusinessException e) {
-            payment.setErrorMessage(e.getMessage());
-            payment.transitionTo(PaymentStatus.FAILED);
-            paymentRepository.save(payment);
+            paymentAuditService.markFailed(payment, e.getMessage());
             throw e;
         }
 
@@ -113,7 +112,7 @@ public class PaymentService {
         payment.setCheckoutRequestId(result.checkoutRequestId());
         payment.setGatewayResponse(result.rawResponse());
 
-        if (result.accepted()){
+        if (result.accepted()) {
             payment.transitionTo(PaymentStatus.PENDING);
         } else {
             payment.transitionTo(PaymentStatus.FAILED);
@@ -127,11 +126,11 @@ public class PaymentService {
     }
 
     @Transactional
-    public void handleMpesaWebhook(DarajaWebhookPayload payload, String rawBody){
-        DarajaWebhookPayload.StkCallback callback=payload.body().stkCallback();
-        String checkoutRequestId=callback.checkoutRequestId();
+    public void handleMpesaWebhook(DarajaWebhookPayload payload, String rawBody) {
+        DarajaWebhookPayload.StkCallback callback = payload.body().stkCallback();
+        String checkoutRequestId = callback.checkoutRequestId();
 
-        Optional<PaymentTransaction> existingTxn=
+        Optional<PaymentTransaction> existingTxn =
                 paymentTransactionRepository.findByExternalTransactionId(checkoutRequestId);
 
         if (existingTxn.isPresent()) {
@@ -139,7 +138,7 @@ public class PaymentService {
             return;
         }
 
-        PaymentTransaction txn= PaymentTransaction.builder()
+        PaymentTransaction txn = PaymentTransaction.builder()
                 .externalTransactionId(checkoutRequestId)
                 .transactionType(TransactionType.WEBHOOK)
                 .payload(rawBody)
@@ -147,7 +146,7 @@ public class PaymentService {
                 .signatureVerified(true)
                 .build();
 
-        Payment payment=paymentRepository.findByCheckoutRequestId(checkoutRequestId).orElse(null);
+        Payment payment = paymentRepository.findByCheckoutRequestId(checkoutRequestId).orElse(null);
 
         if (payment == null) {
             txn.setStatus(TransactionStatus.DISCARDED);
@@ -159,20 +158,20 @@ public class PaymentService {
 
         txn.setPayment(payment);
 
-        boolean success=callback.resultCode()!=null && callback.resultCode()==0;
+        boolean success = callback.resultCode() != null && callback.resultCode() == 0;
 
-        if ((success)){
-            String mpesaReceiptNumber= extractMetadataValue(callback, "MpesaReceiptNumber");
+        if (success) {
+            String mpesaReceiptNumber = extractMetadataValue(callback, "MpesaReceiptNumber");
             payment.setExternalTransactionRef(mpesaReceiptNumber);
             payment.transitionTo(PaymentStatus.COMPLETED);
-        }else {
+        } else {
             payment.setErrorMessage(callback.resultDesc());
             payment.transitionTo(PaymentStatus.FAILED);
         }
 
         paymentRepository.save(payment);
 
-        Order order=payment.getOrder();
+        Order order = payment.getOrder();
         order.setPaymentStatus(payment.getStatus());
         orderRepository.save(order);
 
@@ -185,12 +184,11 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
-    public PaymentStatusResponse getPaymentStatus(String paymentId, String authenticatedUserId){
-
+    public PaymentStatusResponse getPaymentStatus(String paymentId, String authenticatedUserId) {
         Payment payment = paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
 
-        if (!payment.getUser().getId().equals(authenticatedUserId)){
+        if (!payment.getUser().getId().equals(authenticatedUserId)) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
 
