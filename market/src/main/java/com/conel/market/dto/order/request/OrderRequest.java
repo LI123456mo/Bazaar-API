@@ -7,8 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 public record OrderRequest(
-        @Valid
-        List<OrderItemRequest> items,
 
         @NotNull(message = "Payment method is required")
         PaymentMethod paymentMethod,

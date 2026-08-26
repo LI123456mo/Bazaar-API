@@ -33,7 +33,7 @@ public enum ErrorCode {
     // ORDERS
     ORDER_NOT_FOUND("ORDER_001", "Order not found", HttpStatus.NOT_FOUND),
     UNAUTHORIZED_ORDER_ACCESS("ORDER_002", "You do not have permission to view this order", HttpStatus.FORBIDDEN),
-    EMPTY_ORDER("ORDER_003", "Order requires at least one item", HttpStatus.BAD_REQUEST), // CHANGED: was ORDER_002 + FORBIDDEN
+    EMPTY_ORDER("ORDER_003", "Order requires at least one item", HttpStatus.BAD_REQUEST),
 
     // CART
     CART_ITEM_NOT_FOUND("CART_001", "Cart item not found", HttpStatus.NOT_FOUND),
