@@ -1,6 +1,7 @@
 package com.conel.market.dto.payment;
 
 import com.conel.market.entity.payment.PaymentMethod;
+import com.conel.market.validation.ValidPaymentInitiation;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -14,6 +15,8 @@ import jakarta.validation.constraints.Pattern;
  *   "idempotencyKey": "650e8400-e29b-41d4-a716-446655440001"
  * }
  */
+
+@ValidPaymentInitiation
 public record PaymentInitiationRequest(
     @NotBlank(message = "Order ID is required")
     String orderId,

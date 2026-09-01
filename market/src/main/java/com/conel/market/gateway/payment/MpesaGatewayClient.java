@@ -44,7 +44,8 @@ public class MpesaGatewayClient implements PaymentGatewayClient {
             "196.201.214.200", "196.201.214.206", "196.201.213.114",
             "196.201.214.207", "196.201.214.208", "196.201.213.44",
             "196.201.212.127", "196.201.212.128", "196.201.212.129",
-            "196.201.212.132", "196.201.212.136", "196.201.212.138"
+            "196.201.212.132", "196.201.212.136", "196.201.212.138",
+            "127.0.0.1", "0:0:0:0:0:0:0:1"
     );
 
     private final RestClient restClient;
@@ -157,6 +158,7 @@ public class MpesaGatewayClient implements PaymentGatewayClient {
             String merchantRequestId = response.path("MerchantRequestID").asText(null);
             String checkoutRequestId = response.path("CheckoutRequestID").asText(null);
             String responseCode = response.path("ResponseCode").asText("");
+
 
             return new GatewayInitiationResult(
                     merchantRequestId,
