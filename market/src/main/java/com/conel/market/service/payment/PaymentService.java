@@ -167,6 +167,7 @@ public class PaymentService {
         } else {
             payment.setErrorMessage(callback.resultDesc());
             payment.transitionTo(PaymentStatus.FAILED);
+            paymentAuditService.scheduleFirstRetryIfEligible(payment);
         }
 
         paymentRepository.save(payment);

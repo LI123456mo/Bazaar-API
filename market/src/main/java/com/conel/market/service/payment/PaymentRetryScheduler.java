@@ -74,6 +74,7 @@ public class PaymentRetryScheduler {
         }
 
         PaymentRetryPolicy policy=policyOpt.get();
+
         int currentRetryCount=payment.getRetryCount()!=null? payment.getRetryCount() :0;
         long elapsedSeconds=Instant.now().getEpochSecond()-payment.getCreatedAt().getEpochSecond();
 

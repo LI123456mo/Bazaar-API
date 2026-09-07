@@ -5,6 +5,7 @@ import com.conel.market.entity.payment.PaymentMethod;
 import com.conel.market.exception.BusinessException;
 import com.conel.market.exception.ErrorCode;
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -187,5 +188,28 @@ public class MpesaGatewayClient implements PaymentGatewayClient {
     }
 
     private record CachedToken(String token, Instant expiresAt) {
+    }
+
+    @PostConstruct
+    private void validateCallbackUrl() {
+        if (callbackUrl == null || callbackUrl.contains("localhost") || callbackUrl.contains("127.0.0.1")) {
+            log.warn("""
+
+            ==========================================================
+             WARNING: M-Pesa callback-url is set to a non-public address:
+             {}
+
+             Safaricom cannot reach this URL. Any STK push you trigger
+             will stay stuck on PENDING forever, even if you enter your
+             PIN and money moves.
+
+             If you're testing locally: start ngrok, then update
+             callback-url (or MPESA_CALLBACK_URL) to your ngrok URL
+             and restart the app.
+            ==========================================================
+            """, callbackUrl);
+        } else {
+            log.info("M-Pesa callback-url looks reachable: {}", callbackUrl);
+        }
     }
 }
