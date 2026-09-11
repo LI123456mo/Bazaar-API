@@ -26,11 +26,15 @@ public class PaymentAuditService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void markFailed(Payment payment, String errorMessage) {
-        payment.setErrorMessage(errorMessage);
-        payment.transitionTo(PaymentStatus.FAILED);
-        Optional<PaymentRetryPolicy> policy = paymentRetryPolicyRepository.findActiveByPaymentMethod(payment.getPaymentMethod());
-        policy.ifPresent(p -> payment.scheduleRetry(p.getBaseDelaySeconds()));
-        paymentRepository.save(payment);
+        // Re-attach the entity within this new transaction(due to detachment issue of hibernate)
+        Payment managed = paymentRepository.findById(payment.getId())
+                .orElse(payment);
+        managed.setErrorMessage(errorMessage);
+        managed.transitionTo(PaymentStatus.FAILED);
+        Optional<PaymentRetryPolicy> policy = paymentRetryPolicyRepository
+                .findActiveByPaymentMethod(managed.getPaymentMethod());
+        policy.ifPresent(p -> managed.scheduleRetry(p.getBaseDelaySeconds()));
+        paymentRepository.save(managed);
     }
 
     public void scheduleFirstRetryIfEligible(Payment payment) {

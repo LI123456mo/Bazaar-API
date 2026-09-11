@@ -43,7 +43,7 @@ public class PaymentRetryScheduler {
                         PaymentGatewayClient::supportedMethod, c -> c));
     }
 
-    @Scheduled(fixedDelay = 300000)
+    @Scheduled(fixedDelay = 10000)
     @Transactional
     public void retryFailedPayments() {
         List<Payment> paymentsToRetry = paymentRepository.findPaymentsReadyForRetry(Instant.now());
