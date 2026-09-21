@@ -163,6 +163,7 @@ public class PaymentService {
         if (success) {
             String mpesaReceiptNumber = extractMetadataValue(callback, "MpesaReceiptNumber");
             payment.setExternalTransactionRef(mpesaReceiptNumber);
+            payment.setNextRetryAt(null);
             payment.transitionTo(PaymentStatus.COMPLETED);
         } else {
             payment.setErrorMessage(callback.resultDesc());
