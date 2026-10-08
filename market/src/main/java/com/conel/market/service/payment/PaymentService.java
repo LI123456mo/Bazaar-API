@@ -166,9 +166,13 @@ public class PaymentService {
             payment.setNextRetryAt(null);
             payment.transitionTo(PaymentStatus.COMPLETED);
         } else {
-            payment.setErrorMessage(callback.resultDesc());
-            payment.transitionTo(PaymentStatus.FAILED);
-            paymentAuditService.scheduleFirstRetryIfEligible(payment);
+            if (payment.getStatus().canTransitionTo(PaymentStatus.FAILED)){
+                payment.setErrorMessage(callback.resultDesc());
+                payment.transitionTo(PaymentStatus.FAILED);
+                paymentAuditService.scheduleFirstRetryIfEligible(payment);
+            }else {
+                log.info("Ignoring failure callback for payment {} already in status {}", payment.getId(),payment.getStatus());
+            }
         }
 
         paymentRepository.save(payment);

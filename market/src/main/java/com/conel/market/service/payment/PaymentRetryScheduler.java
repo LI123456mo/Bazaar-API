@@ -63,8 +63,8 @@ public class PaymentRetryScheduler {
         }
     }
 
-    private void retryPayment(Payment payment){
-        Optional<PaymentRetryPolicy> policyOpt=paymentRetryPolicyRepository
+    private void retryPayment(Payment payment) {
+        Optional<PaymentRetryPolicy> policyOpt = paymentRetryPolicyRepository
                 .findActiveByPaymentMethod(payment.getPaymentMethod());
 
         if (policyOpt.isEmpty()) {
@@ -73,10 +73,10 @@ public class PaymentRetryScheduler {
             return;
         }
 
-        PaymentRetryPolicy policy=policyOpt.get();
+        PaymentRetryPolicy policy = policyOpt.get();
 
-        int currentRetryCount=payment.getRetryCount()!=null? payment.getRetryCount() :0;
-        long elapsedSeconds=Instant.now().getEpochSecond()-payment.getCreatedAt().getEpochSecond();
+        int currentRetryCount = payment.getRetryCount() != null ? payment.getRetryCount() : 0;
+        long elapsedSeconds = Instant.now().getEpochSecond() - payment.getCreatedAt().getEpochSecond();
 
         if (!policy.shouldRetry(currentRetryCount, elapsedSeconds)) {
             log.info("Payment {} has exceeded retry limits — marking as final FAILED", payment.getId());
@@ -91,30 +91,31 @@ public class PaymentRetryScheduler {
             return;
         }
 
+        PaymentGatewayClient.GatewayInitiationResult result;
         try {
-            PaymentInitiationRequest request=new PaymentInitiationRequest(
+            PaymentInitiationRequest request = new PaymentInitiationRequest(
                     payment.getOrder().getId(),
                     payment.getPaymentMethod(),
                     payment.getIdempotencyKey() + "-retry-" + (currentRetryCount + 1),
                     payment.getPhoneNumber()
             );
-
-            PaymentGatewayClient.GatewayInitiationResult result=
-                    gateway.initiate(request, payment.getAmount(), payment.getIdempotencyKey());
-
-            payment.setMerchantRequestId(result.merchantRequestId());
-            payment.setCheckoutRequestId(result.checkoutRequestId());
-            payment.setGatewayResponse(result.rawResponse());
-
-            if (result.accepted()) {
-                payment.transitionTo(PaymentStatus.PENDING);
-                payment.setNextRetryAt(null);
-            } else {
-                payment.scheduleRetry(policy.getBaseDelaySeconds());
-            }
-
-        }catch (Exception e){
+            result = gateway.initiate(request, payment.getAmount(), payment.getIdempotencyKey());
+        } catch (Exception e) {
             log.error("Gateway call failed during retry for payment {}", payment.getId(), e);
+            payment.scheduleRetry(policy.getBaseDelaySeconds());
+            paymentRepository.save(payment);
+            return;
+        }
+
+        // Step 2: Safaricom answered, so update our own records
+        payment.setMerchantRequestId(result.merchantRequestId());
+        payment.setCheckoutRequestId(result.checkoutRequestId());
+        payment.setGatewayResponse(result.rawResponse());
+
+        if (result.accepted()) {
+            payment.transitionTo(PaymentStatus.PENDING);
+            payment.setNextRetryAt(null);
+        } else {
             payment.scheduleRetry(policy.getBaseDelaySeconds());
         }
 

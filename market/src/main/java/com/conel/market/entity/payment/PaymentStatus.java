@@ -29,7 +29,8 @@ public enum PaymentStatus {
             case INITIATED -> targetStatus == PENDING || targetStatus == FAILED || targetStatus == CANCELLED || targetStatus == TIMEOUT;
             case PENDING -> targetStatus == COMPLETED || targetStatus == FAILED || targetStatus == TIMEOUT || targetStatus == CANCELLED;
             case COMPLETED -> targetStatus == REFUNDED;
-            case FAILED, REFUNDED, TIMEOUT, CANCELLED -> false;
+            case FAILED -> targetStatus == PENDING || targetStatus==COMPLETED;
+            case REFUNDED, TIMEOUT, CANCELLED -> false;
         };
     }
 }
