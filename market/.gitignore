@@ -31,13 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
-uploads/
-.env
 
-   .env
-   *.pem
-   src/main/resources/keys/
-   uploads/
-   .env
-   *.pem
-   src/main/resources/keys/
+.env
+*.pem
+keys/
+uploads/
+logs/

@@ -27,14 +27,21 @@ public class JwtService {
     @Value("${app.security.jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;
 
-    @Value("${app.security.jwt.private-key-path:keys/local-only/private_key.pem}")
+    @Value("${app.security.jwt.private-key-path:}")
     private String privateKeyPath;
 
-    @Value("${app.security.jwt.public-key-path:keys/local-only/public_key.pem}")
+    @Value("${app.security.jwt.public-key-path:}")
     private String publicKeyPath;
 
     @PostConstruct
     public void init() throws Exception {
+        if (privateKeyPath == null || privateKeyPath.isBlank()) {
+            throw new IllegalStateException("app.security.jwt.private-key-path must be configured");
+        }
+        if (publicKeyPath == null || publicKeyPath.isBlank()) {
+            throw new IllegalStateException("app.security.jwt.public-key-path must be configured");
+        }
+
         this.privateKey = KeyUtils.loadPrivateKey(privateKeyPath);
         this.publicKey = KeyUtils.loadPublicKey(publicKeyPath);
     }
