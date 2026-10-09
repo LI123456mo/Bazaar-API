@@ -1,11 +1,11 @@
 spring:
-  application:
-    name: market
+  config:
+    import: optional:file:.env[.properties]
 
   datasource:
-    url: jdbc:postgresql://${DB_URL}:${DB_PORT}/${DB_NAME}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://${DB_URL:localhost}:${DB_PORT:5432}/${DB_NAME:market}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -19,38 +19,55 @@ spring:
         format_sql: true
 
   mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
     properties:
       mail:
         smtp:
-          auth: true
+          auth: false
           starttls:
-            enable: true
-            required: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
+            enable: false
+            required: false
 
   ai:
     openai:
       api-key: ${GROG_API}
       base-url: https://api.groq.com/openai
-      chat:
-        options:
-          model: llama-3.1-8b-instant
-    ollama:
-      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
-      embedding:
-        model: nomic-embed-text
 
-#        m-pesa
+app:
+  security:
+    jwt:
+      access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:86400000}
+      refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000}
+      private-key-path: ${JWT_PRIVATE_KEY_PATH}
+      public-key-path: ${JWT_PUBLIC_KEY_PATH}
+
+  email:
+    verification-token-expiry: ${EMAIL_VERIFICATION_TOKEN_EXPIRY:24}
+    from: ${MAIL_FROM:noreply@localhost.local}
+    sender-name: ${MAIL_SENDER_NAME:Bazaar Platform}
+    verification-base-url: ${APP_VERIFICATION_BASE_URL:http://localhost:8080}
+
+  app:
+    file-storage:
+      upload-dir: ${FILE_UPLOAD_DIR:./uploads}
+      max-file-size-mb: ${FILE_MAX_SIZE_MB:5}
+      allowed-content-types: ${FILE_ALLOWED_CONTENT_TYPES:image/jpeg,image/png,image/webp}
+
+  rag:
+    project-root: ${RAG_PROJECT_ROOT:${user.dir}}
+
+  admin:
+    email: ${ADMIN_EMAIL:admin@localhost.local}
+    password: ${ADMIN_PASSWORD}
+    phone: ${ADMIN_PHONE:0000000000}
+
 mpesa:
-  consumer-key: ${MPESA_CONSUMER_KEY:REPLACE_ME}
-  consumer-secret: ${MPESA_CONSUMER_SECRET:REPLACE_ME}
+  consumer-key: ${MPESA_CONSUMER_KEY:test}
+  consumer-secret: ${MPESA_CONSUMER_SECRET:test}
   shortcode: ${MPESA_SHORTCODE:174379}
-  passkey: ${MPESA_PASSKEY:REPLACE_ME}
-  callback-url: ${MPESA_CALLBACK_URL:https://applied-untrained-nanometer.ngrok-free.dev/api/v1/payments/webhook/mpesa}
+  passkey: ${MPESA_PASSKEY:test}
+  callback-url: ${MPESA_CALLBACK_URL:http://localhost:8080/api/v1/payments/webhook/mpesa}
   base-url: ${MPESA_BASE_URL:https://sandbox.safaricom.co.ke}

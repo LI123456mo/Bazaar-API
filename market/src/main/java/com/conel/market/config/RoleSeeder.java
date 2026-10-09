@@ -27,21 +27,36 @@ public class RoleSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${app.admin.email}")
+    @Value("${app.admin.email:}")
     private String adminEmail;
 
-    @Value("${app.admin.password}")
+    @Value("${app.admin.password:}")
     private String adminPassword;
 
-    @Value("${app.admin.phone}")
+    @Value("${app.admin.phone:}")
     private String adminPhone;
 
     @Override
     public void run(String... args) throws Exception {
         log.info("Starting data seeding...");
+        if ("prod".equalsIgnoreCase(System.getProperty("spring.profiles.active", ""))) {
+            validateRequiredValues();
+        }
         seedRoles();
         seedSuperAdmin();
         log.info("Data seeding completed");
+    }
+
+    private void validateRequiredValues() {
+        if (adminEmail == null || adminEmail.isBlank()) {
+            throw new IllegalStateException("app.admin.email is required");
+        }
+        if (adminPassword == null || adminPassword.isBlank()) {
+            throw new IllegalStateException("app.admin.password is required");
+        }
+        if (adminPhone == null || adminPhone.isBlank()) {
+            throw new IllegalStateException("app.admin.phone is required");
+        }
     }
 
     private void seedRoles() {

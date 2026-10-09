@@ -2,9 +2,6 @@ spring:
   application:
     name: bazaar-market
 
-  profiles:
-    active: local
-
   config:
     import: optional:file:.env[.properties]
 
@@ -33,25 +30,27 @@ logging:
 app:
   security:
     jwt:
-      access-token-expiration: 86400000
-      refresh-token-expiration: 604800000
+      access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:86400000}
+      refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800000}
+      private-key-path: ${JWT_PRIVATE_KEY_PATH}
+      public-key-path: ${JWT_PUBLIC_KEY_PATH}
 
   email:
-    verification-token-expiry: 24
-    from: ${MAIL_FROM:noreply@bazaar.local}
-    sender-name: ${MAIL_SENDER_NAME:Bazaar Platform}
-    verification-base-url: ${APP_VERIFICATION_BASE_URL:http://localhost:8080}
+    verification-token-expiry: ${EMAIL_VERIFICATION_TOKEN_EXPIRY:24}
+    from: ${MAIL_FROM}
+    sender-name: ${MAIL_SENDER_NAME}
+    verification-base-url: ${APP_VERIFICATION_BASE_URL}
 
   app:
     file-storage:
-      upload-dir: ./uploads
-      max-file-size-mb: 5
-      allowed-content-types: image/jpeg,image/png,image/webp
+      upload-dir: ${FILE_UPLOAD_DIR:./uploads}
+      max-file-size-mb: ${FILE_MAX_SIZE_MB:5}
+      allowed-content-types: ${FILE_ALLOWED_CONTENT_TYPES:image/jpeg,image/png,image/webp}
 
   rag:
     project-root: ${RAG_PROJECT_ROOT:${user.dir}}
 
   admin:
-    email: ${ADMIN_EMAIL:conellimo@gmail.com}
-    password: ${ADMIN_PASSWORD:conellimo}
-    phone: ${ADMIN_PHONE:0000000000}
+    email: ${ADMIN_EMAIL}
+    password: ${ADMIN_PASSWORD}
+    phone: ${ADMIN_PHONE}

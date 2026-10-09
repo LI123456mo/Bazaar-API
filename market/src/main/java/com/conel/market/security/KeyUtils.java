@@ -1,6 +1,9 @@
 package com.conel.market.security;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -10,20 +13,20 @@ import java.util.Base64;
 
 public class KeyUtils {
 
-    private KeyUtils(){}
+    private KeyUtils() {}
 
     public static PrivateKey loadPrivateKey(final String pemPath) throws Exception {
-        final String key = readKeyFromResource(pemPath).replace("-----BEGIN PRIVATE KEY-----", "")
+        final String key = readKey(pemPath).replace("-----BEGIN PRIVATE KEY-----", "")
                 .replace("-----END PRIVATE KEY-----", "")
                 .replaceAll("\\s", "");
 
-        final byte[] decoded= Base64.getDecoder().decode(key);
-        final PKCS8EncodedKeySpec keySpec=new PKCS8EncodedKeySpec(decoded);
+        final byte[] decoded = Base64.getDecoder().decode(key);
+        final PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decoded);
         return KeyFactory.getInstance("RSA").generatePrivate(keySpec);
     }
 
     public static PublicKey loadPublicKey(final String pemPath) throws Exception {
-        final String key = readKeyFromResource(pemPath).replace("-----BEGIN PUBLIC KEY-----", "")
+        final String key = readKey(pemPath).replace("-----BEGIN PUBLIC KEY-----", "")
                 .replace("-----END PUBLIC KEY-----", "")
                 .replaceAll("\\s", "");
 
@@ -32,7 +35,12 @@ public class KeyUtils {
         return KeyFactory.getInstance("RSA").generatePublic(keySpec);
     }
 
-    private static String readKeyFromResource(final String path) throws Exception {
+    private static String readKey(final String path) throws IOException {
+        final Path resolved = Path.of(path);
+        if (Files.isRegularFile(resolved)) {
+            return Files.readString(resolved);
+        }
+
         try (final InputStream is = KeyUtils.class.getClassLoader().getResourceAsStream(path)) {
             if (is == null) {
                 throw new IllegalArgumentException("Key not found: " + path);
