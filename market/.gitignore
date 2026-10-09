@@ -33,3 +33,11 @@ build/
 .vscode/
 uploads/
 .env
+
+   .env
+   *.pem
+   src/main/resources/keys/
+   uploads/
+   .env
+   *.pem
+   src/main/resources/keys/
