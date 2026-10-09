@@ -166,12 +166,22 @@ public class PaymentService {
             payment.setNextRetryAt(null);
             payment.transitionTo(PaymentStatus.COMPLETED);
         } else {
-            if (payment.getStatus().canTransitionTo(PaymentStatus.FAILED)){
+            if (payment.getStatus().canTransitionTo(PaymentStatus.FAILED)) {
                 payment.setErrorMessage(callback.resultDesc());
                 payment.transitionTo(PaymentStatus.FAILED);
-                paymentAuditService.scheduleFirstRetryIfEligible(payment);
-            }else {
-                log.info("Ignoring failure callback for payment {} already in status {}", payment.getId(),payment.getStatus());
+
+                if (MpesaFailureClassifier.isRetryable(callback.resultCode())) {
+                    paymentAuditService.scheduleFirstRetryIfEligible(payment);
+                    log.info("Payment {} failed with retryable code {}, retry scheduled",
+                            payment.getId(), callback.resultCode());
+                } else {
+                    payment.setNextRetryAt(null);
+                    log.info("Payment {} failed with final code {} ({}), no automatic retry",
+                            payment.getId(), callback.resultCode(), callback.resultDesc());
+                }
+            } else {
+                log.info("Ignoring failure callback for payment {} already in status {}",
+                        payment.getId(), payment.getStatus());
             }
         }
 
